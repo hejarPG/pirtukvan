@@ -105,13 +105,18 @@ class _SelectablePdfViewerState extends State<SelectablePdfViewer> {
                   constraints: const BoxConstraints(
                     maxWidth: 320,
                   ),
-                  padding: const EdgeInsets.all(12),
+                  // padding: const EdgeInsets.all(12),
                   child: AutoSizeText(
                     selectionVM.overlayText ?? '',
-                    style: const TextStyle(color: Colors.white, fontSize: 200),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 400,
+                      fontFamily: 'Vazirmatn',
+                    ),
                     textAlign: TextAlign.right,
                     maxLines: 100,
-                    // softWrap: true,
+                    minFontSize: 5,
+                    softWrap: true,
                   ),
                 ),
               ),

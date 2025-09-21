@@ -59,9 +59,11 @@ class _ReaderPageContent extends StatelessWidget {
           ),
         ),
       ),
-      floatingActionButton: selectionVM.selectedText != null && selectionVM.selectedText!.isNotEmpty
-          ? FloatingActionButton(
-              onPressed: () async {
+    floatingActionButton: selectionVM.selectedText != null && selectionVM.selectedText!.isNotEmpty
+      ? FloatingActionButton(
+        onPressed: selectionVM.isTranslating
+          ? null
+          : () async {
                 // Use centralized config so developers can set it in one place.
                 // See `lib/data/config.dart`.
                 final configuredKey = geminiApiKey;
@@ -82,7 +84,10 @@ class _ReaderPageContent extends StatelessWidget {
                 }
 
                 final translator = TranslatorService(apiKey: configuredKey);
+                // set translating state so UI shows loader
+                Provider.of<ReaderSelectionViewModel>(context, listen: false).setTranslating(true);
                 final translation = await translator.translateToPersian(selectionVM.selectedText!);
+                Provider.of<ReaderSelectionViewModel>(context, listen: false).setTranslating(false);
                 if (context.mounted) {
                   showDialog(
                     context: context,
@@ -99,7 +104,16 @@ class _ReaderPageContent extends StatelessWidget {
                   );
                 }
               },
-              child: const Icon(Icons.translate),
+              child: selectionVM.isTranslating
+                  ? const SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        strokeWidth: 2.5,
+                      ),
+                    )
+                  : const Icon(Icons.translate),
             )
           : null,
     );

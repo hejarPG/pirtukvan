@@ -2,7 +2,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:pdfrx/pdfrx.dart';
 import '../../../data/services/translator_service.dart';
 import 'package:pirtukvan/data/config.dart';
 import '../view_model/reader_selection_view_model.dart';
@@ -36,28 +35,11 @@ class _ReaderPageContent extends StatelessWidget {
       body: SelectablePdfViewer(
         filePath: file.path,
         onSelection: (text) {
-          // optional hook, provider already updated by the viewer widget
+          // provider updated by the viewer widget; no extra action needed here
+          if (text != null && text.isNotEmpty) {
+            Provider.of<ReaderSelectionViewModel>(context, listen: false).setSelectedText(text);
+          }
         },
-        pdfViewer: PdfViewer.file(
-          file.path,
-          params: PdfViewerParams(
-            textSelectionParams: PdfTextSelectionParams(
-              onTextSelectionChange: (selection) async {
-                try {
-                  final selected = await selection.getSelectedText();
-                  if (selected.isNotEmpty) {
-                    if (context.mounted) {
-                      // Only update provider so the floating translate button appears; do not show dialog
-                      Provider.of<ReaderSelectionViewModel>(context, listen: false).setSelectedText(selected);
-                    }
-                  }
-                } catch (e) {
-                  // ignore errors when fetching selected text
-                }
-              },
-            ),
-          ),
-        ),
       ),
     floatingActionButton: selectionVM.selectedText != null && selectionVM.selectedText!.isNotEmpty
       ? FloatingActionButton(
@@ -68,41 +50,25 @@ class _ReaderPageContent extends StatelessWidget {
                 // See `lib/data/config.dart`.
                 final configuredKey = geminiApiKey;
                 if (configuredKey == 'YOUR_GEMINI_API_KEY' || configuredKey.isEmpty) {
+                  // If API key missing, show overlay with error message anchored to selection
                   if (context.mounted) {
-                    showDialog(
-                      context: context,
-                      builder: (ctx) => AlertDialog(
-                        title: const Text('Translation'),
-                        content: const Text('Translation failed: missing or invalid Gemini API key. Please set your API key in lib/data/config.dart or initialize Gemini in main().'),
-                        actions: [
-                          TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('OK')),
-                        ],
-                      ),
+                    Provider.of<ReaderSelectionViewModel>(context, listen: false).setOverlayText(
+                      'Translation failed: missing Gemini API key. Set it in lib/data/config.dart.',
                     );
                   }
                   return;
                 }
 
+                final vm = Provider.of<ReaderSelectionViewModel>(context, listen: false);
                 final translator = TranslatorService(apiKey: configuredKey);
                 // set translating state so UI shows loader
-                Provider.of<ReaderSelectionViewModel>(context, listen: false).setTranslating(true);
-                final translation = await translator.translateToPersian(selectionVM.selectedText!);
-                Provider.of<ReaderSelectionViewModel>(context, listen: false).setTranslating(false);
-                if (context.mounted) {
-                  showDialog(
-                    context: context,
-                    builder: (ctx) => AlertDialog(
-                      title: const Text('Translation'),
-                      content: Text(translation),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.of(ctx).pop(),
-                          child: const Text('OK'),
-                        ),
-                      ],
-                    ),
-                  );
-                }
+                vm.setTranslating(true);
+                // capture text before awaiting to avoid using context/VM across async gap
+                final textToTranslate = selectionVM.selectedText;
+                final translation = await translator.translateToPersian(textToTranslate ?? '');
+                vm.setTranslating(false);
+                // Set overlay text in view model so the SelectablePdfViewer will render it
+                vm.setOverlayText(translation);
               },
               child: selectionVM.isTranslating
                   ? const SizedBox(

@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "1071097425510",
+    "project_id": "pdf-reader-ce5eb",
+    "storage_bucket": "pdf-reader-ce5eb.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1071097425510:android:d093494af0fc07ce5d47a7",
+        "android_client_info": {
+          "package_name": "com.example.pdf_reader"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDLyoLzh3gJDHp-i-uIzUvo3nVEtm_48io"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1071097425510:android:3abbbfbcbfe054c35d47a7",
+        "android_client_info": {
+          "package_name": "com.example.pirtukvan"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDLyoLzh3gJDHp-i-uIzUvo3nVEtm_48io"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

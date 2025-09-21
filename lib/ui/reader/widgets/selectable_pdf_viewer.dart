@@ -56,8 +56,7 @@ class _SelectablePdfViewerState extends State<SelectablePdfViewer> {
             child: GestureDetector(
               behavior: HitTestBehavior.translucent,
               onTap: () {
-                // tap on viewer should hide overlay
-                selectionVM.setOverlayText(null);
+                selectionVM.clearSelection();
               },
             ),
           ),

@@ -101,14 +101,16 @@ class _SelectablePdfViewerState extends State<SelectablePdfViewer> {
                   decoration: BoxDecoration(
                     color: Colors.black87.withOpacity(0.85),
                   ),
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: Alignment.center,
-                    child: Text(
-                      selectionVM.overlayText ?? '',
-                      style: const TextStyle(color: Colors.white),
-                      textAlign: TextAlign.center,
-                    ),
+                  constraints: const BoxConstraints(
+                    maxWidth: 320,
+                  ),
+                  padding: const EdgeInsets.all(12),
+                  child: Text(
+                    selectionVM.overlayText ?? '',
+                    style: const TextStyle(color: Colors.white),
+                    textAlign: TextAlign.right,
+                    softWrap: true,
+                    overflow: TextOverflow.visible,
                   ),
                 ),
               ),

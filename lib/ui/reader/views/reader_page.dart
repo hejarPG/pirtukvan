@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pdfrx/pdfrx.dart';
 import '../../../data/services/translator_service.dart';
+import 'package:pirtukvan/data/config.dart';
 import '../view_model/reader_selection_view_model.dart';
 import '../widgets/selectable_pdf_viewer.dart';
 
@@ -61,7 +62,26 @@ class _ReaderPageContent extends StatelessWidget {
       floatingActionButton: selectionVM.selectedText != null && selectionVM.selectedText!.isNotEmpty
           ? FloatingActionButton(
               onPressed: () async {
-                final translator = TranslatorService(apiKey: 'YOUR_GEMINI_API_KEY');
+                // Use centralized config so developers can set it in one place.
+                // See `lib/data/config.dart`.
+                final configuredKey = geminiApiKey;
+                if (configuredKey == 'YOUR_GEMINI_API_KEY' || configuredKey.isEmpty) {
+                  if (context.mounted) {
+                    showDialog(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: const Text('Translation'),
+                        content: const Text('Translation failed: missing or invalid Gemini API key. Please set your API key in lib/data/config.dart or initialize Gemini in main().'),
+                        actions: [
+                          TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('OK')),
+                        ],
+                      ),
+                    );
+                  }
+                  return;
+                }
+
+                final translator = TranslatorService(apiKey: configuredKey);
                 final translation = await translator.translateToPersian(selectionVM.selectedText!);
                 if (context.mounted) {
                   showDialog(

@@ -34,9 +34,28 @@ class _ReaderPageContent extends StatelessWidget {
       ),
       body: SelectablePdfViewer(
         filePath: file.path,
+        onSelection: (text) {
+          // optional hook, provider already updated by the viewer widget
+        },
         pdfViewer: PdfViewer.file(
           file.path,
-          params: const PdfViewerParams(),
+          params: PdfViewerParams(
+            textSelectionParams: PdfTextSelectionParams(
+              onTextSelectionChange: (selection) async {
+                try {
+                  final selected = await selection.getSelectedText();
+                  if (selected.isNotEmpty) {
+                    if (context.mounted) {
+                      // Only update provider so the floating translate button appears; do not show dialog
+                      Provider.of<ReaderSelectionViewModel>(context, listen: false).setSelectedText(selected);
+                    }
+                  }
+                } catch (e) {
+                  // ignore errors when fetching selected text
+                }
+              },
+            ),
+          ),
         ),
       ),
       floatingActionButton: selectionVM.selectedText != null && selectionVM.selectedText!.isNotEmpty

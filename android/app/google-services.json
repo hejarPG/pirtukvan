@@ -1,32 +1,13 @@
 {
   "project_info": {
-    "project_number": "1071097425510",
-    "project_id": "pdf-reader-ce5eb",
-    "storage_bucket": "pdf-reader-ce5eb.firebasestorage.app"
+    "project_number": "397414897523",
+    "project_id": "pirtukvan-d0c66",
+    "storage_bucket": "pirtukvan-d0c66.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1071097425510:android:d093494af0fc07ce5d47a7",
-        "android_client_info": {
-          "package_name": "com.example.pdf_reader"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyDLyoLzh3gJDHp-i-uIzUvo3nVEtm_48io"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:1071097425510:android:3abbbfbcbfe054c35d47a7",
+        "mobilesdk_app_id": "1:397414897523:android:aef5032de5a979f6a7d706",
         "android_client_info": {
           "package_name": "com.example.pirtukvan"
         }
@@ -34,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDLyoLzh3gJDHp-i-uIzUvo3nVEtm_48io"
+          "current_key": "AIzaSyBz1pFNOeSFZIkLY4RBYS4cbFDI_tCNXug"
         }
       ],
       "services": {

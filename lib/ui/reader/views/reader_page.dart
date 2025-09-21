@@ -60,12 +60,14 @@ class _ReaderPageContent extends StatelessWidget {
                 }
 
                 final vm = Provider.of<ReaderSelectionViewModel>(context, listen: false);
-                final translator = TranslatorService(apiKey: configuredKey);
+                final translator = TranslatorService();
                 // set translating state so UI shows loader
                 vm.setTranslating(true);
                 // capture text before awaiting to avoid using context/VM across async gap
                 final textToTranslate = selectionVM.selectedText;
-                final translation = await translator.translateToPersian(textToTranslate ?? '');
+                final translation = await translator.translate(
+                   textToTranslate ?? '',
+                );
                 vm.setTranslating(false);
                 // Set overlay text in view model so the SelectablePdfViewer will render it
                 vm.setOverlayText(translation);

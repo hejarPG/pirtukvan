@@ -41,48 +41,49 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyCgozL53WLXLTdwztAunzCvHlHxzWIq8d4',
-    appId: '1:1071097425510:web:0131d9fb2d6efcaa5d47a7',
-    messagingSenderId: '1071097425510',
-    projectId: 'pdf-reader-ce5eb',
-    authDomain: 'pdf-reader-ce5eb.firebaseapp.com',
-    storageBucket: 'pdf-reader-ce5eb.firebasestorage.app',
-    measurementId: 'G-Z78BW6PBNZ',
+    apiKey: 'AIzaSyAa9ew-AxEswqpckCYL32oJ_MEeaLLBZwQ',
+    appId: '1:397414897523:web:c1af12354c11e0daa7d706',
+    messagingSenderId: '397414897523',
+    projectId: 'pirtukvan-d0c66',
+    authDomain: 'pirtukvan-d0c66.firebaseapp.com',
+    storageBucket: 'pirtukvan-d0c66.firebasestorage.app',
+    measurementId: 'G-ZF4NVK8Y76',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDLyoLzh3gJDHp-i-uIzUvo3nVEtm_48io',
-    appId: '1:1071097425510:android:3abbbfbcbfe054c35d47a7',
-    messagingSenderId: '1071097425510',
-    projectId: 'pdf-reader-ce5eb',
-    storageBucket: 'pdf-reader-ce5eb.firebasestorage.app',
+    apiKey: 'AIzaSyBz1pFNOeSFZIkLY4RBYS4cbFDI_tCNXug',
+    appId: '1:397414897523:android:aef5032de5a979f6a7d706',
+    messagingSenderId: '397414897523',
+    projectId: 'pirtukvan-d0c66',
+    storageBucket: 'pirtukvan-d0c66.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyCBzxCvM0zWyXFkxyfQKnTN4L-4T-Q8YV0',
-    appId: '1:1071097425510:ios:2c5c52acc87bda035d47a7',
-    messagingSenderId: '1071097425510',
-    projectId: 'pdf-reader-ce5eb',
-    storageBucket: 'pdf-reader-ce5eb.firebasestorage.app',
+    apiKey: 'AIzaSyB4X-14hNBeROXwguxRDRCN44_mp5-nx8E',
+    appId: '1:397414897523:ios:9f925eb12ce4787ba7d706',
+    messagingSenderId: '397414897523',
+    projectId: 'pirtukvan-d0c66',
+    storageBucket: 'pirtukvan-d0c66.firebasestorage.app',
     iosBundleId: 'com.example.pirtukvan',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyCBzxCvM0zWyXFkxyfQKnTN4L-4T-Q8YV0',
-    appId: '1:1071097425510:ios:2c5c52acc87bda035d47a7',
-    messagingSenderId: '1071097425510',
-    projectId: 'pdf-reader-ce5eb',
-    storageBucket: 'pdf-reader-ce5eb.firebasestorage.app',
+    apiKey: 'AIzaSyB4X-14hNBeROXwguxRDRCN44_mp5-nx8E',
+    appId: '1:397414897523:ios:9f925eb12ce4787ba7d706',
+    messagingSenderId: '397414897523',
+    projectId: 'pirtukvan-d0c66',
+    storageBucket: 'pirtukvan-d0c66.firebasestorage.app',
     iosBundleId: 'com.example.pirtukvan',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyCgozL53WLXLTdwztAunzCvHlHxzWIq8d4',
-    appId: '1:1071097425510:web:cd3c8622d461efa05d47a7',
-    messagingSenderId: '1071097425510',
-    projectId: 'pdf-reader-ce5eb',
-    authDomain: 'pdf-reader-ce5eb.firebaseapp.com',
-    storageBucket: 'pdf-reader-ce5eb.firebasestorage.app',
-    measurementId: 'G-YXJYTX81RF',
+    apiKey: 'AIzaSyAa9ew-AxEswqpckCYL32oJ_MEeaLLBZwQ',
+    appId: '1:397414897523:web:0da88dea0223b7d2a7d706',
+    messagingSenderId: '397414897523',
+    projectId: 'pirtukvan-d0c66',
+    authDomain: 'pirtukvan-d0c66.firebaseapp.com',
+    storageBucket: 'pirtukvan-d0c66.firebasestorage.app',
+    measurementId: 'G-018YW4KDS0',
   );
+
 }

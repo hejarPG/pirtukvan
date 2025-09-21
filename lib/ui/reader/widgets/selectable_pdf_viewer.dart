@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:pdfrx/pdfrx.dart';
 import 'package:provider/provider.dart';
@@ -105,12 +106,12 @@ class _SelectablePdfViewerState extends State<SelectablePdfViewer> {
                     maxWidth: 320,
                   ),
                   padding: const EdgeInsets.all(12),
-                  child: Text(
+                  child: AutoSizeText(
                     selectionVM.overlayText ?? '',
-                    style: const TextStyle(color: Colors.white),
+                    style: const TextStyle(color: Colors.white, fontSize: 200),
                     textAlign: TextAlign.right,
-                    softWrap: true,
-                    overflow: TextOverflow.visible,
+                    maxLines: 100,
+                    // softWrap: true,
                   ),
                 ),
               ),

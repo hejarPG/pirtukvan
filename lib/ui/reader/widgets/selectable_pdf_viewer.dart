@@ -64,37 +64,52 @@ class _SelectablePdfViewerState extends State<SelectablePdfViewer> {
           // Render overlay when selection belongs to this page
           final widgets = <Widget>[];
           if (selectionVM.selectedPageNumber == page.pageNumber && selectionVM.selectedBounds != null && selectionVM.isOverlayVisible) {
-            // convert PDF page coords to view coords: pageRect is scaled/positioned rectangle
+            // Convert PdfRect (PDF page coords) to Flutter Rect in viewer coordinates
             final bounds = selectionVM.selectedBounds!;
-            // bounds is PdfRect (pdf coords). To position inside pageRect we compute
-            // left/top relative to pageRect using pageRect.width/height vs PDF page size.
-            // pdfrx provides controller.currentZoom which already applied to pageRect.
-            // We'll compute normalized position using page.pageSize (PdfPage.size)
-            final pageSize = page.size;
-            if (pageSize.width > 0 && pageSize.height > 0) {
-              final dx = (bounds.left / pageSize.width) * pageRect.width;
-              final dy = (bounds.top / pageSize.height) * pageRect.height;
+            // toRectInDocument will map PDF coords to the provided pageRect
+            // Use a page-local pageRect (origin at 0,0) so the conversion returns
+            // coordinates relative to the page. This avoids offsets and keeps the
+            // overlay scrolling in sync with the page.
+            final pageLocalRect = Rect.fromLTWH(0, 0, pageRect.width, pageRect.height);
+            final localRect = bounds.toRectInDocument(page: page, pageRect: pageLocalRect);
 
-              widgets.add(Positioned(
-                left: pageRect.left + dx,
-                top: pageRect.top + dy - 44 /* offset above selection */,
-                child: Material(
-                  color: Colors.transparent,
-                  child: Container(
-                    constraints: const BoxConstraints(maxWidth: 240),
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.black87,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+            // Debug logging to help diagnose offset/scroll mismatch
+            assert(() {
+              // only log in debug mode
+              // ignore: avoid_print
+              print('--- pdfrx overlay debug ---');
+              // ignore: avoid_print
+              print('pdf bounds: left=${bounds.left}, top=${bounds.top}, width=${bounds.width}, height=${bounds.height}, page=${selectionVM.selectedPageNumber}');
+              // ignore: avoid_print
+              print('pageRect (viewer): $pageRect');
+              // ignore: avoid_print
+              print('localRect (page-local): $localRect');
+              return true;
+            }());
+
+            widgets.add(Positioned(
+              left: localRect.left,
+              top: localRect.top,
+              width: localRect.width,
+              height: localRect.height,
+              child: Material(
+                color: Colors.transparent,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.black87.withOpacity(0.85),
+                  ),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.center,
                     child: Text(
                       selectionVM.overlayText ?? '',
                       style: const TextStyle(color: Colors.white),
+                      textAlign: TextAlign.center,
                     ),
                   ),
                 ),
-              ));
-            }
+              ),
+            ));
           }
           return widgets;
         },

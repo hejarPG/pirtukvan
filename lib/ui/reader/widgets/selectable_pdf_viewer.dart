@@ -19,9 +19,10 @@ class SelectablePdfViewer extends StatefulWidget {
   State<SelectablePdfViewer> createState() => _SelectablePdfViewerState();
 }
 
-class _SelectablePdfViewerState extends State<SelectablePdfViewer> {
+class _SelectablePdfViewerState extends State<SelectablePdfViewer> with WidgetsBindingObserver {
   final _controller = PdfViewerController();
   String? _fileKey;
+  int? _lastSeenPage;
   // no need to keep lastRange field; selection bounds are stored in ViewModel
   @override
   void initState() {
@@ -36,6 +37,36 @@ class _SelectablePdfViewerState extends State<SelectablePdfViewer> {
       // if there is a saved page for this key, we don't navigate here because
       // navigation must be done when the viewer reports ready (onViewerReady).
     }();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    // Persist last seen page when the widget is disposed (viewer closed)
+    if (_lastSeenPage != null) {
+      if (_fileKey != null) {
+        PdfPageStorageService.saveLastPageForKey(_fileKey!, _lastSeenPage!);
+      } else {
+        PdfPageStorageService.saveLastPage(widget.filePath, _lastSeenPage!);
+      }
+    }
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Save when app goes to background/paused/inactive so the last seen page is preserved
+    if (state == AppLifecycleState.paused || state == AppLifecycleState.detached || state == AppLifecycleState.inactive) {
+      if (_lastSeenPage != null) {
+        if (_fileKey != null) {
+          PdfPageStorageService.saveLastPageForKey(_fileKey!, _lastSeenPage!);
+        } else {
+          PdfPageStorageService.saveLastPage(widget.filePath, _lastSeenPage!);
+        }
+      }
+    }
+    super.didChangeAppLifecycleState(state);
   }
 
   Widget build(BuildContext context) {
@@ -48,12 +79,8 @@ class _SelectablePdfViewerState extends State<SelectablePdfViewer> {
         // When the viewer notifies a page change, persist it.
         onPageChanged: (page) async {
           if (page != null) {
-            // PdfPageChangedCallback uses 1-based page numbers
-            if (_fileKey != null) {
-              await PdfPageStorageService.saveLastPageForKey(_fileKey!, page);
-            } else {
-              await PdfPageStorageService.saveLastPage(widget.filePath, page);
-            }
+            // Cache last seen page (1-based page number). Persist only on dispose or lifecycle pause.
+            _lastSeenPage = page;
           }
         },
         // When the viewer is ready, try to restore the last saved page

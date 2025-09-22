@@ -55,7 +55,12 @@ class _SelectablePdfViewerState extends State<SelectablePdfViewer> {
           Positioned.fill(
             child: GestureDetector(
               behavior: HitTestBehavior.translucent,
-              onTap: () {
+              onTap: () async {
+                try {
+                  await _controller.textSelectionDelegate.clearTextSelection();
+                } catch (_) {
+                  // ignore: no-op
+                }
                 selectionVM.clearSelection();
               },
             ),

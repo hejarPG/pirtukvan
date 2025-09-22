@@ -48,16 +48,6 @@ class _ReaderPageContent extends StatelessWidget {
           : () async {
                 // Use centralized config so developers can set it in one place.
                 // See `lib/data/config.dart`.
-                final configuredKey = geminiApiKey;
-                if (configuredKey == 'YOUR_GEMINI_API_KEY' || configuredKey.isEmpty) {
-                  // If API key missing, show overlay with error message anchored to selection
-                  if (context.mounted) {
-                    Provider.of<ReaderSelectionViewModel>(context, listen: false).setOverlayText(
-                      'Translation failed: missing Gemini API key. Set it in lib/data/config.dart.',
-                    );
-                  }
-                  return;
-                }
 
                 final vm = Provider.of<ReaderSelectionViewModel>(context, listen: false);
                 final translator = TranslatorService();

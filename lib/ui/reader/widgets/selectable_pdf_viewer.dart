@@ -152,15 +152,7 @@ class _SelectablePdfViewerState extends State<SelectablePdfViewer> with WidgetsB
 
             // Debug logging to help diagnose offset/scroll mismatch
             assert(() {
-              // only log in debug mode
-              // ignore: avoid_print
-              print('--- pdfrx overlay debug ---');
-              // ignore: avoid_print
-              print('pdf bounds: left=${bounds.left}, top=${bounds.top}, width=${bounds.width}, height=${bounds.height}, page=${selectionVM.selectedPageNumber}');
-              // ignore: avoid_print
-              print('pageRect (viewer): $pageRect');
-              // ignore: avoid_print
-              print('localRect (page-local): $localRect');
+              // debug logging removed; keep assert for debug-time evaluation
               return true;
             }());
 

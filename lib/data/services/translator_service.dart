@@ -21,8 +21,8 @@ class TranslatorService {
         options: DefaultFirebaseOptions.currentPlatform,
       );
     } catch (_) {}
-    final modelName = SettingsService.getModel();
-    _model = FirebaseAI.googleAI().generativeModel(model: modelName);
+  final modelName = SettingsService.getModel();
+  _model = FirebaseAI.googleAI().generativeModel(model: modelName);
     _initialized = true;
   }
 

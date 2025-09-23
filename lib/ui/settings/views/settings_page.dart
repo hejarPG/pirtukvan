@@ -65,7 +65,7 @@ class _SettingsFormState extends State<_SettingsForm> {
           const Text('Choose LLM model:'),
           const SizedBox(height: 8),
           DropdownButtonFormField<String>(
-            value: vm.selectedModel,
+            initialValue: vm.selectedModel,
             items: vm.availableModels
                 .map((m) => DropdownMenuItem(value: m, child: Text(m)))
                 .toList(),
@@ -78,8 +78,11 @@ class _SettingsFormState extends State<_SettingsForm> {
           ElevatedButton(
             onPressed: () async {
               vm.updatePrompt(_promptController.text);
+              // Capture navigator before async work to avoid using BuildContext
+              // across an await (use_build_context_synchronously lint).
+              final navigator = Navigator.of(context);
               await vm.save();
-              if (mounted) Navigator.of(context).pop();
+              if (mounted) navigator.pop();
             },
             child: const Text('Save'),
           ),

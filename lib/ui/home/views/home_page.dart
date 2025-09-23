@@ -9,9 +9,12 @@ class HomePage extends StatelessWidget {
 
   Future<void> _openPdf(BuildContext context) async {
     final picker = PdfPickerService();
+    // Capture the Navigator before the async gap to avoid using BuildContext
+    // after an await (use_build_context_synchronously lint).
+    final navigator = Navigator.of(context);
     final file = await picker.pickPdf();
     if (file != null) {
-      Navigator.of(context).push(
+      navigator.push(
         MaterialPageRoute(
           builder: (_) => ReaderPage(file: file),
         ),

@@ -69,6 +69,7 @@ class _SelectablePdfViewerState extends State<SelectablePdfViewer> with WidgetsB
     super.didChangeAppLifecycleState(state);
   }
 
+  @override
   Widget build(BuildContext context) {
     final selectionVM = Provider.of<ReaderSelectionViewModel>(context);
 
@@ -165,7 +166,9 @@ class _SelectablePdfViewerState extends State<SelectablePdfViewer> with WidgetsB
                 color: Colors.transparent,
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.black87.withOpacity(0.85),
+                    // Avoid deprecated withOpacity; construct color with ARGB to
+                    // preserve precision and avoid the deprecation warning.
+                    color: Color.fromARGB((0.85 * 255).round(), 0, 0, 0),
                   ),
                   constraints: const BoxConstraints(
                     maxWidth: 320,

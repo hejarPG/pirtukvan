@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:pirtukvan/firebase_options.dart';
 import 'ui/home/views/home_page.dart';
+import 'ui/app_theme.dart';
 import 'data/services/pdf_page_storage_service.dart';
 import 'data/services/settings_service.dart';
 import 'data/services/intent_handler_service.dart';
@@ -34,9 +35,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Pirtukvan',
       navigatorKey: navigatorKey,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: ThemeMode.system,
       home: const HomePage(),
     );
   }

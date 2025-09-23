@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import '../../../data/services/pdf_picker_service.dart';
 import '../../reader/views/reader_page.dart';
+import '../../settings/views/settings_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -23,6 +24,14 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Home'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const SettingsPage()),
+            ),
+          )
+        ],
         centerTitle: true,
       ),
       body: Center(

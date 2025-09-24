@@ -58,7 +58,7 @@ class _ScrollThumbsState extends State<ScrollThumbs> {
                   ),
                 ],
               ),
-              child: Center(child: Text(widget.controller.pageNumber.toString())),
+              child: Center(child: Text(widget.controller.pageNumber.toString(), style: const TextStyle(color: Colors.black))),
             ),
         onPanStart: (details) {
           _panStartOffset = top - details.localPosition.dy;

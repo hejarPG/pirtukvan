@@ -43,6 +43,50 @@ class SettingsService {
     if (_initialized) return;
     // Hive should already be initialized by other services, but open the box if not
     await Hive.openBox(_boxName);
+    // Ensure default prompt items exist in storage. This keeps the prompts
+    // consistent with how other prompts are saved (as a list of maps).
+    try {
+      final raw = _box.get(_keyPrompts);
+      final current = <PromptItem>[];
+      if (raw is List) {
+        for (final itm in raw) {
+          if (itm is Map) {
+            current.add(PromptItem.fromMap(itm));
+          } else if (itm is String) {
+            try {
+              final m = json.decode(itm);
+              if (m is Map) current.add(PromptItem.fromMap(m));
+            } catch (_) {}
+          }
+        }
+      }
+
+      final translatePrompt = PromptItem(
+        id: 'seed-translate',
+        name: 'Translate to Persian',
+        text:
+            'Translate the following text to Persian (Farsi). Just return the translation, nothing else.\nText: {text}',
+      );
+
+      final explainPrompt = PromptItem(
+        id: 'seed-explain',
+        name: 'Explain simply in Persian with examples',
+        text:
+            'Explain the following text in Persian (Farsi) using simple words and short sentences. Provide 2-3 short examples that illustrate the explanation. Only output Persian, nothing else.\nText: {text}',
+      );
+
+      var needSave = false;
+      if (!current.any((p) => p.id == translatePrompt.id)) {
+        current.add(translatePrompt);
+        needSave = true;
+      }
+      if (!current.any((p) => p.id == explainPrompt.id)) {
+        current.add(explainPrompt);
+        needSave = true;
+      }
+
+      if (needSave) await _savePrompts(current);
+    } catch (_) {}
     _initialized = true;
   }
 

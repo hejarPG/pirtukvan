@@ -22,7 +22,7 @@ class TranslatorService {
       );
     } catch (_) {}
   final modelName = SettingsService.getModel();
-  _model = FirebaseAI.googleAI().generativeModel(model: modelName);
+  _model = FirebaseAI.googleAI().generativeModel(model: modelName, tools: [Tool.googleSearch()]);
     _initialized = true;
   }
 

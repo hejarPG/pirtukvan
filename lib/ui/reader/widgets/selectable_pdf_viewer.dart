@@ -171,7 +171,7 @@ class _SelectablePdfViewerState extends State<SelectablePdfViewer> with WidgetsB
                       // preserve precision and avoid the deprecation warning.
                       color: Color.fromARGB((0.85 * 255).round(), 0, 0, 0),
                     ),
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(2),
                     child: SingleChildScrollView(
                       child: Text(
                         selectionVM.overlayText ?? '',

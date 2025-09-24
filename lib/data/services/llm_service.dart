@@ -34,13 +34,37 @@ class LlmService {
     int attempt = 0;
     while (true) {
       try {
-        final response = await _model.generateContent(prompt);
-        return response.text?.trim() ?? '';
+        // Collect response from streaming API to preserve current behavior
+        final buffer = StringBuffer();
+        final stream = _model.generateContentStream(prompt);
+        await for (final chunk in stream) {
+          final chunkText = chunk.text?.trim() ?? '';
+          if (chunkText.isNotEmpty) buffer.write(chunkText);
+        }
+        return buffer.toString();
       } catch (e) {
         if (attempt >= retryCount) rethrow;
         await Future.delayed(Duration(milliseconds: 500 * (attempt + 1)));
         attempt++;
       }
+    }
+  }
+
+  /// Streams chunks of the generated content as they arrive.
+  ///
+  /// Yields each chunk's text (as-is, trimmed). This method does not perform
+  /// automatic retries; callers who need retries should collect the stream and
+  /// implement their own retry logic if required.
+  Stream<String> generateStream(String text, {String? promptTemplate}) async* {
+    await initialize();
+    final template = promptTemplate ?? SettingsService.getPromptTemplate();
+    final filled = template.replaceAll('{text}', text);
+    final prompt = [Content.text(filled)];
+
+    final responseStream = _model.generateContentStream(prompt);
+    await for (final chunk in responseStream) {
+      final chunkText = chunk.text ?? '';
+      yield chunkText;
     }
   }
 }

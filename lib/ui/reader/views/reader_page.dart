@@ -74,13 +74,26 @@ class _ReaderPageContent extends StatelessWidget {
                   chosenTemplate = sel?.text;
                 }
 
-                final translation = await translator.generate(
+                // Stream translation so UI updates as chunks arrive
+                final stream = translator.generateStream(
                   textToTranslate ?? '',
                   promptTemplate: chosenTemplate,
                 );
-                vm.setTranslating(false);
-                // Set overlay text in view model so the SelectablePdfViewer will render it
-                vm.setOverlayText(translation);
+                final buffer = StringBuffer();
+                try {
+                  await for (final chunk in stream) {
+                    if (chunk.isNotEmpty) {
+                      buffer.write(chunk);
+                      // Update overlay as we receive chunks so the viewer shows progress
+                      vm.setOverlayText(buffer.toString());
+                    }
+                  }
+                } catch (e) {
+                  // On error, clear translating state and optionally set an error message
+                  vm.setOverlayText('');
+                } finally {
+                  vm.setTranslating(false);
+                }
               },
               child: selectionVM.isTranslating
                   ? const SizedBox(

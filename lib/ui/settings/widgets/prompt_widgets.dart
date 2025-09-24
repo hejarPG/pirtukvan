@@ -50,54 +50,57 @@ class PromptList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: vm.prompts.isEmpty
-          ? const Center(child: Text('No saved prompts'))
-          : ListView.separated(
-              itemCount: vm.prompts.length,
-              separatorBuilder: (_, _) => const Divider(height: 8),
-              itemBuilder: (context, idx) {
-                final p = vm.prompts[idx];
-                return ListTile(
-                  title: Text(p.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                  subtitle: Text(
-                    p.text,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.edit),
-                        onPressed: () async {
-                          final res = await showPromptEditorDialog(context, title: 'Edit prompt', initialName: p.name, initialText: p.text);
-                          if (res != null) {
-                            await vm.updatePrompt(PromptItem(id: p.id, name: res['name'] ?? p.name, text: res['text'] ?? p.text));
-                          }
-                        },
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.delete),
-                        onPressed: () async {
-                          final ok = await showDialog<bool>(
-                              context: context,
-                              builder: (_) => AlertDialog(
-                                    title: const Text('Delete prompt'),
-                                    content: const Text('Are you sure you want to delete this prompt?'),
-                                    actions: [
-                                      TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('No')),
-                                      ElevatedButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('Yes')),
-                                    ],
-                                  ));
-                          if (ok == true) await vm.deletePrompt(p.id);
-                        },
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
+    if (vm.prompts.isEmpty) {
+      return const Center(child: Text('No saved prompts'));
+    }
+
+    return ListView.separated(
+      shrinkWrap: true,
+      itemCount: vm.prompts.length,
+  separatorBuilder: (context, index) => const Divider(height: 1),
+      itemBuilder: (context, idx) {
+        final p = vm.prompts[idx];
+        return ListTile(
+          dense: true,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          title: Text(p.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+          subtitle: Text(
+            p.text,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.edit),
+                onPressed: () async {
+                  final res = await showPromptEditorDialog(context, title: 'Edit prompt', initialName: p.name, initialText: p.text);
+                  if (res != null) {
+                    await vm.updatePrompt(PromptItem(id: p.id, name: res['name'] ?? p.name, text: res['text'] ?? p.text));
+                  }
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.delete),
+                onPressed: () async {
+                  final ok = await showDialog<bool>(
+                      context: context,
+                      builder: (_) => AlertDialog(
+                            title: const Text('Delete prompt'),
+                            content: const Text('Are you sure you want to delete this prompt?'),
+                            actions: [
+                              TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('No')),
+                              ElevatedButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('Yes')),
+                            ],
+                          ));
+                  if (ok == true) await vm.deletePrompt(p.id);
+                },
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

@@ -21,80 +21,100 @@ class ReaderPage extends StatelessWidget {
   }
 }
 
-class _ReaderPageContent extends StatelessWidget {
+class _ReaderPageContent extends StatefulWidget {
   final File file;
   const _ReaderPageContent({required this.file});
+
+  @override
+  State<_ReaderPageContent> createState() => _ReaderPageContentState();
+}
+
+class _ReaderPageContentState extends State<_ReaderPageContent> {
+  bool _darkMode = false;
 
   @override
   Widget build(BuildContext context) {
     final selectionVM = Provider.of<ReaderSelectionViewModel>(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text(file.path.split('/').last),
+        title: Text(widget.file.path.split('/').last),
+        actions: [
+          IconButton(
+            icon: Icon(_darkMode ? Icons.light_mode : Icons.dark_mode),
+            tooltip: _darkMode ? 'Light mode' : 'Dark mode',
+            onPressed: () => setState(() => _darkMode = !_darkMode),
+          ),
+        ],
       ),
-      body: SelectablePdfViewer(
-        filePath: file.path,
-        onSelection: (text) {
-          // provider updated by the viewer widget; no extra action needed here
-          if (text != null && text.isNotEmpty) {
-            Provider.of<ReaderSelectionViewModel>(context, listen: false).setSelectedText(text);
-          }
-        },
+      body: ColorFiltered(
+        colorFilter: ColorFilter.mode(
+          Colors.white,
+          _darkMode ? BlendMode.difference : BlendMode.dst,
+        ),
+        child: SelectablePdfViewer(
+          filePath: widget.file.path,
+          onSelection: (text) {
+            // provider updated by the viewer widget; no extra action needed here
+            if (text != null && text.isNotEmpty) {
+              Provider.of<ReaderSelectionViewModel>(context, listen: false).setSelectedText(text);
+            }
+          },
+        ),
       ),
-    floatingActionButton: selectionVM.selectedText != null && selectionVM.selectedText!.isNotEmpty
+      floatingActionButton: selectionVM.selectedText != null && selectionVM.selectedText!.isNotEmpty
           ? FloatingActionButton(
-        onPressed: selectionVM.isTranslating
-          ? null
-          : () async {
-                // Use centralized config so developers can set it in one place.
-                // See `lib/data/config.dart`.
+              onPressed: selectionVM.isTranslating
+                  ? null
+                  : () async {
+                      // Use centralized config so developers can set it in one place.
+                      // See `lib/data/config.dart`.
 
-                final vm = Provider.of<ReaderSelectionViewModel>(context, listen: false);
-                final translator = LlmService();
-                // set translating state so UI shows loader
-                vm.setTranslating(true);
-                // capture text before awaiting to avoid using context/VM across async gap
-                final textToTranslate = selectionVM.selectedText;
-                // Ask user to choose a prompt template if any are saved
-                final prompts = SettingsService.getPrompts();
-                String? chosenTemplate;
-                if (prompts.isNotEmpty) {
-                  final sel = await showDialog<PromptItem?>(
-                    context: context,
-                    builder: (_) => SimpleDialog(
-                      title: const Text('Choose prompt'),
-                      children: prompts
-                          .map((p) => SimpleDialogOption(
-                                onPressed: () => Navigator.of(context).pop(p),
-                                child: Text(p.name),
-                              ))
-                          .toList(),
-                    ),
-                  );
-                  chosenTemplate = sel?.text;
-                }
+                      final vm = Provider.of<ReaderSelectionViewModel>(context, listen: false);
+                      final translator = LlmService();
+                      // set translating state so UI shows loader
+                      vm.setTranslating(true);
+                      // capture text before awaiting to avoid using context/VM across async gap
+                      final textToTranslate = selectionVM.selectedText;
+                      // Ask user to choose a prompt template if any are saved
+                      final prompts = SettingsService.getPrompts();
+                      String? chosenTemplate;
+                      if (prompts.isNotEmpty) {
+                        final sel = await showDialog<PromptItem?>(
+                          context: context,
+                          builder: (_) => SimpleDialog(
+                            title: const Text('Choose prompt'),
+                            children: prompts
+                                .map((p) => SimpleDialogOption(
+                                      onPressed: () => Navigator.of(context).pop(p),
+                                      child: Text(p.name),
+                                    ))
+                                .toList(),
+                          ),
+                        );
+                        chosenTemplate = sel?.text;
+                      }
 
-                // Stream translation so UI updates as chunks arrive
-                final stream = translator.generateStream(
-                  textToTranslate ?? '',
-                  promptTemplate: chosenTemplate,
-                );
-                final buffer = StringBuffer();
-                try {
-                  await for (final chunk in stream) {
-                    if (chunk.isNotEmpty) {
-                      buffer.write(chunk);
-                      // Update overlay as we receive chunks so the viewer shows progress
-                      vm.setOverlayText(buffer.toString());
-                    }
-                  }
-                } catch (e) {
-                  // On error, clear translating state and optionally set an error message
-                  vm.setOverlayText('');
-                } finally {
-                  vm.setTranslating(false);
-                }
-              },
+                      // Stream translation so UI updates as chunks arrive
+                      final stream = translator.generateStream(
+                        textToTranslate ?? '',
+                        promptTemplate: chosenTemplate,
+                      );
+                      final buffer = StringBuffer();
+                      try {
+                        await for (final chunk in stream) {
+                          if (chunk.isNotEmpty) {
+                            buffer.write(chunk);
+                            // Update overlay as we receive chunks so the viewer shows progress
+                            vm.setOverlayText(buffer.toString());
+                          }
+                        }
+                      } catch (e) {
+                        // On error, clear translating state and optionally set an error message
+                        vm.setOverlayText('');
+                      } finally {
+                        vm.setTranslating(false);
+                      }
+                    },
               child: selectionVM.isTranslating
                   ? const SizedBox(
                       width: 24,
@@ -104,7 +124,7 @@ class _ReaderPageContent extends StatelessWidget {
                         strokeWidth: 2.5,
                       ),
                     )
-      : const Icon(Icons.smart_toy),
+                  : const Icon(Icons.smart_toy),
             )
           : null,
     );

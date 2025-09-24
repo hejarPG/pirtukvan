@@ -169,7 +169,7 @@ class _SelectablePdfViewerState extends State<SelectablePdfViewer> with WidgetsB
                     decoration: BoxDecoration(
                       // Avoid deprecated withOpacity; construct color with ARGB to
                       // preserve precision and avoid the deprecation warning.
-                      color: Color.fromARGB((0.85 * 255).round(), 0, 0, 0),
+                      color: Color.fromARGB((0.95 * 255).round(), 0, 0, 0),
                     ),
                     padding: const EdgeInsets.all(2),
                     child: SingleChildScrollView(

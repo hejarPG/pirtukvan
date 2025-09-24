@@ -54,13 +54,12 @@ class PromptList extends StatelessWidget {
       child: vm.prompts.isEmpty
           ? const Center(child: Text('No saved prompts'))
           : ListView.separated(
-              padding: const EdgeInsets.all(8),
               itemCount: vm.prompts.length,
-              separatorBuilder: (_, __) => const Divider(height: 8),
+              separatorBuilder: (_, _) => const Divider(height: 8),
               itemBuilder: (context, idx) {
                 final p = vm.prompts[idx];
                 return ListTile(
-                  title: Text(p.name),
+                  title: Text(p.name, style: const TextStyle(fontWeight: FontWeight.bold)),
                   subtitle: Text(
                     p.text,
                     maxLines: 2,

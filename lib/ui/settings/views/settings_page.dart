@@ -70,13 +70,9 @@ class _SettingsFormState extends State<_SettingsForm> {
           const SizedBox(height: 8),
           AddPromptButton(vm: vm),
 
-          SizedBox(
-            height: 180,
+          Expanded(
             child: PromptList(vm: vm),
           ),
-          const SizedBox(height: 8),
-          // AddPromptButton(vm: vm),
-          const SizedBox(height: 16),
         ],
       ),
     );

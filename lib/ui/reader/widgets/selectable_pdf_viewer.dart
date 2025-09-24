@@ -163,29 +163,29 @@ class _SelectablePdfViewerState extends State<SelectablePdfViewer> with WidgetsB
               height: localRect.height,
               child: Material(
                 color: Colors.transparent,
-                child: Container(
-                  decoration: BoxDecoration(
-                    // Avoid deprecated withOpacity; construct color with ARGB to
-                    // preserve precision and avoid the deprecation warning.
-                    color: Color.fromARGB((0.85 * 255).round(), 0, 0, 0),
-                  ),
-                  constraints: const BoxConstraints(
-                    maxWidth: 320,
-                  ),
-                  // padding: const EdgeInsets.all(12),
-                  child: SingleChildScrollView(
-                    child: Text(
-                    selectionVM.overlayText ?? '',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontFamily: 'Vazirmatn',
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      // Avoid deprecated withOpacity; construct color with ARGB to
+                      // preserve precision and avoid the deprecation warning.
+                      color: Color.fromARGB((0.85 * 255).round(), 0, 0, 0),
                     ),
-                    textAlign: TextAlign.justify,
-                    textDirection: TextDirection.rtl,
-                    softWrap: true,
+                    padding: const EdgeInsets.all(12),
+                    child: SingleChildScrollView(
+                      child: Text(
+                        selectionVM.overlayText ?? '',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontFamily: 'Vazirmatn',
+                        ),
+                        textAlign: TextAlign.justify,
+                        textDirection: TextDirection.rtl,
+                        softWrap: true,
+                      ),
+                    ),
                   ),
-                  )
                 ),
               ),
             ));

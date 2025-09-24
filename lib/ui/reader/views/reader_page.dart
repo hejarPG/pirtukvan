@@ -2,7 +2,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../data/services/translator_service.dart';
+import '../../../data/services/llm_service.dart';
 import '../../../data/services/settings_service.dart';
 import '../view_model/reader_selection_view_model.dart';
 import '../widgets/selectable_pdf_viewer.dart';
@@ -50,7 +50,7 @@ class _ReaderPageContent extends StatelessWidget {
                 // See `lib/data/config.dart`.
 
                 final vm = Provider.of<ReaderSelectionViewModel>(context, listen: false);
-                final translator = TranslatorService();
+                final translator = LlmService();
                 // set translating state so UI shows loader
                 vm.setTranslating(true);
                 // capture text before awaiting to avoid using context/VM across async gap

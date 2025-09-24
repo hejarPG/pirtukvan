@@ -4,10 +4,10 @@ import 'package:firebase_core/firebase_core.dart';
 import '../../firebase_options.dart';
 import 'settings_service.dart';
 
-class TranslatorService {
-  static final TranslatorService _instance = TranslatorService._internal();
-  factory TranslatorService() => _instance;
-  TranslatorService._internal();
+class LlmService {
+  static final LlmService _instance = LlmService._internal();
+  factory LlmService() => _instance;
+  LlmService._internal();
 
   bool _initialized = false;
   late final GenerativeModel _model;

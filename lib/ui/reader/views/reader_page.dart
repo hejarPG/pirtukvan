@@ -104,7 +104,7 @@ class _ReaderPageContent extends StatelessWidget {
                         strokeWidth: 2.5,
                       ),
                     )
-                  : const Icon(Icons.translate),
+      : const Icon(Icons.smart_toy),
             )
           : null,
     );

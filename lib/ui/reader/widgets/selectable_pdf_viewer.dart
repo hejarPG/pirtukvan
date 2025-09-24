@@ -159,8 +159,8 @@ class _SelectablePdfViewerState extends State<SelectablePdfViewer> with WidgetsB
             widgets.add(Positioned(
               left: localRect.left,
               top: localRect.top,
-              width: localRect.width,
-              height: localRect.height,
+              width: localRect.width > 50 ? localRect.width : 50, // min width
+              height: localRect.height > 50 ? localRect.height : 50, // min height
               child: Material(
                 color: Colors.transparent,
                 child: ClipRRect(

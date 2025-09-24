@@ -26,7 +26,7 @@ class LlmService {
     _initialized = true;
   }
 
-  Future<String> translate(String text, {String? promptTemplate, int retryCount = 2}) async {
+  Future<String> generate(String text, {String? promptTemplate, int retryCount = 2}) async {
     await initialize();
     final template = promptTemplate ?? SettingsService.getPromptTemplate();
     final filled = template.replaceAll('{text}', text);

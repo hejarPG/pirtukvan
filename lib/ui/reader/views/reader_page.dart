@@ -74,7 +74,7 @@ class _ReaderPageContent extends StatelessWidget {
                   chosenTemplate = sel?.text;
                 }
 
-                final translation = await translator.translate(
+                final translation = await translator.generate(
                   textToTranslate ?? '',
                   promptTemplate: chosenTemplate,
                 );

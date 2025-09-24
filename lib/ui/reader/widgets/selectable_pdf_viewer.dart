@@ -174,19 +174,19 @@ class _SelectablePdfViewerState extends State<SelectablePdfViewer> with WidgetsB
                     maxWidth: 320,
                   ),
                   // padding: const EdgeInsets.all(12),
-                  child: AutoSizeText(
+                  child: SingleChildScrollView(
+                    child: Text(
                     selectionVM.overlayText ?? '',
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 400,
+                      fontSize: 12,
                       fontFamily: 'Vazirmatn',
                     ),
                     textAlign: TextAlign.justify,
                     textDirection: TextDirection.rtl,
-                    maxLines: 100,
-                    minFontSize: 5,
                     softWrap: true,
                   ),
+                  )
                 ),
               ),
             ));

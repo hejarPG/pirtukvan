@@ -26,9 +26,9 @@ class TranslatorService {
     _initialized = true;
   }
 
-  Future<String> translate(String text, {int retryCount = 2}) async {
+  Future<String> translate(String text, {String? promptTemplate, int retryCount = 2}) async {
     await initialize();
-    final template = SettingsService.getPromptTemplate();
+    final template = promptTemplate ?? SettingsService.getPromptTemplate();
     final filled = template.replaceAll('{text}', text);
     final prompt = [Content.text(filled)];
     int attempt = 0;

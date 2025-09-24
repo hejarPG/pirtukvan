@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../data/services/translator_service.dart';
+import '../../../data/services/settings_service.dart';
 import '../view_model/reader_selection_view_model.dart';
 import '../widgets/selectable_pdf_viewer.dart';
 
@@ -41,7 +42,7 @@ class _ReaderPageContent extends StatelessWidget {
         },
       ),
     floatingActionButton: selectionVM.selectedText != null && selectionVM.selectedText!.isNotEmpty
-      ? FloatingActionButton(
+          ? FloatingActionButton(
         onPressed: selectionVM.isTranslating
           ? null
           : () async {
@@ -54,8 +55,28 @@ class _ReaderPageContent extends StatelessWidget {
                 vm.setTranslating(true);
                 // capture text before awaiting to avoid using context/VM across async gap
                 final textToTranslate = selectionVM.selectedText;
+                // Ask user to choose a prompt template if any are saved
+                final prompts = SettingsService.getPrompts();
+                String? chosenTemplate;
+                if (prompts.isNotEmpty) {
+                  final sel = await showDialog<PromptItem?>(
+                    context: context,
+                    builder: (_) => SimpleDialog(
+                      title: const Text('Choose prompt'),
+                      children: prompts
+                          .map((p) => SimpleDialogOption(
+                                onPressed: () => Navigator.of(context).pop(p),
+                                child: Text(p.name),
+                              ))
+                          .toList(),
+                    ),
+                  );
+                  chosenTemplate = sel?.text;
+                }
+
                 final translation = await translator.translate(
-                   textToTranslate ?? '',
+                  textToTranslate ?? '',
+                  promptTemplate: chosenTemplate,
                 );
                 vm.setTranslating(false);
                 // Set overlay text in view model so the SelectablePdfViewer will render it

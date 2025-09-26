@@ -197,8 +197,8 @@ class _SelectablePdfViewerState extends State<SelectablePdfViewer> with WidgetsB
                       constraints: BoxConstraints(maxWidth: maxAllowedWidth, maxHeight: maxHeight),
                       child: SingleChildScrollView(
                         child: IntrinsicWidth(
-                          child: Align(
-                            alignment: Alignment.centerLeft,
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
                             child: Text(
                               selectionVM.overlayText ?? '',
                               style: const TextStyle(

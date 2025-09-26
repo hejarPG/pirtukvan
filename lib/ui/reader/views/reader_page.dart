@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../data/services/llm_service.dart';
 import '../../../data/services/settings_service.dart';
+import '../../settings/views/settings_page.dart';
 import '../view_model/reader_selection_view_model.dart';
 import '../widgets/selectable_pdf_viewer.dart';
 
@@ -39,6 +40,13 @@ class _ReaderPageContentState extends State<_ReaderPageContent> {
       appBar: AppBar(
         title: Text(widget.file.path.split('/').last),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            tooltip: 'Settings',
+            onPressed: () {
+              Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SettingsPage()));
+            },
+          ),
           IconButton(
             icon: Icon(_darkMode ? Icons.light_mode : Icons.dark_mode),
             tooltip: _darkMode ? 'Light mode' : 'Dark mode',

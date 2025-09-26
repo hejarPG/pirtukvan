@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../data/services/pdf_picker_service.dart';
 import '../../reader/views/reader_page.dart';
 import '../../settings/views/settings_page.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -37,11 +38,74 @@ class HomePage extends StatelessWidget {
         ],
         centerTitle: true,
       ),
-      body: Center(
-        child: ElevatedButton(
-          onPressed: () => _openPdf(context),
-          child: const Text('Open PDF'),
-        ),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  ElevatedButton(
+                    onPressed: () => _openPdf(context),
+                    child: const Text('Open PDF'),
+                  ),
+                  const SizedBox(height: 24),
+                  Card(
+                    elevation: 2,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'About us',
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            "Pirtukvan is a lightweight PDF reader created and maintained by HejarPG. It combines a clean, focused reading experience with optional LLM-powered tools to help you summarize, search, and interact with documents as you read.",
+                            style: Theme.of(context).textTheme.bodyMedium,
+                            textAlign: TextAlign.justify,
+                          ),
+                          const SizedBox(height: 12),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton.icon(
+                              onPressed: () async {
+                                const url = 'https://github.com/hejarpg';
+                                final scaffold = ScaffoldMessenger.of(context);
+                                try {
+                                  final launched = await launchUrlString(url);
+                                  if (!launched) {
+                                    scaffold.showSnackBar(
+                                      const SnackBar(content: Text('Could not open URL.')),
+                                    );
+                                  }
+                                } catch (_) {
+                                  scaffold.showSnackBar(
+                                    const SnackBar(content: Text('Could not open URL.')),
+                                  );
+                                }
+                              },
+                              icon: const Icon(Icons.link),
+                              label: const Text('GitHub'),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }

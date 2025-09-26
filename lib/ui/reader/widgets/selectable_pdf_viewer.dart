@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'dart:math' as math;
 import 'package:pdfrx/pdfrx.dart';
 import 'package:provider/provider.dart';
+import 'selection_overlay.dart' as sel_overlay;
 import '../view_model/reader_selection_view_model.dart';
 import 'scroll_thumbs.dart';
 import '../../../data/services/pdf_page_storage_service.dart';
@@ -157,99 +157,14 @@ class _SelectablePdfViewerState extends State<SelectablePdfViewer> with WidgetsB
               return true;
             }());
 
-            // Calculate overlay width behavior: grow to fit content until full width
-            // Use the PDF page's available width (pageRect.width) rather than
-            // the device screen width so decisions are based on the viewer's
-            // content area.
-            final availableWidth = pageRect.width;
-            const largeBreakpoint = 300.0;
-            final fixedLargeWidth = 0.7 * availableWidth;
-
-            // max allowed width: available page width on small/medium, capped on large
-            final maxAllowedWidth = availableWidth < largeBreakpoint ? availableWidth : math.min(fixedLargeWidth, availableWidth);
-
-            // Horizontal placement: we'll align the overlay's center to the
-            // selection center using an Align inside a full-width Positioned.
-            // This avoids guessing the child's intrinsic width.
-            final selectionCenterX = localRect.left + localRect.width / 2.0;
-            // Map selection center X (0..pageRect.width) to Alignment.x (-1..1)
-            final alignmentX = ((selectionCenterX / pageRect.width) * 2.0) - 1.0;
-
-            // Space above and below the selection (in page-local coords)
-            final spaceAbove = localRect.top;
-            final spaceBelow = pageRect.height - localRect.bottom;
-
-            final showBelow = spaceBelow >= spaceAbove;
-            final availableSpace = showBelow ? spaceBelow : spaceAbove;
-
-            // Minimum height we want for the overlay. If this doesn't fit in the
-            // available space, we allow the overlay to overlap the selection so
-            // the content still shows (but we won't exceed the page height).
-            const minHeight = 240.0;
-
-            // effectiveHeight: at least minHeight when possible, but never larger
-            // than the page height and prefer availableSpace when it's larger.
-            final effectiveHeight = math.min(math.max(availableSpace, minHeight), pageRect.height);
-
-            // Small gap so overlay doesn't touch/cover the selection when possible
-            const gap = 8.0;
-
-            // Compute top so overlay sits below or above selection. If there isn't
-            // enough space, adjust so it stays inside page bounds and may overlap
-            // the selection.
-            double top = 0.0;
-            if (showBelow) {
-              top = localRect.bottom + gap;
-              if (top + effectiveHeight > pageRect.height) {
-                top = math.max(0.0, pageRect.height - effectiveHeight);
-              }
-            } else {
-              top = localRect.top - gap - effectiveHeight;
-              if (top < 0.0) {
-                top = 0.0;
-              }
-            }
-
-            widgets.add(Positioned(
-              left: 0,
-              right: 0,
-              top: top,
-              child: Align(
-                alignment: Alignment(alignmentX.clamp(-1.0, 1.0), 0.0),
-                child: Material(
-                  color: Colors.transparent,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Color.fromARGB((0.95 * 255).round(), 0, 0, 0),
-                      ),
-                      padding: const EdgeInsets.all(8),
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(maxWidth: maxAllowedWidth, maxHeight: effectiveHeight, minHeight: math.min(minHeight, effectiveHeight)),
-                        child: SingleChildScrollView(
-                          child: IntrinsicWidth(
-                            child: Align(
-                              alignment: Alignment.centerLeft,
-                              child: Text(
-                                selectionVM.overlayText ?? '',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 12,
-                                  fontFamily: 'Vazirmatn',
-                                ),
-                                textAlign: TextAlign.start,
-                                textDirection: TextDirection.rtl,
-                                softWrap: true,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+            widgets.add(sel_overlay.SelectionOverlay(
+              pageRect: pageRect,
+              localRect: localRect,
+              overlayText: selectionVM.overlayText,
+              minHeight: 240.0,
+              largeBreakpoint: 300.0,
+              fixedLargeWidthFactor: 0.7,
+              gap: 8.0,
             ));
 
           }

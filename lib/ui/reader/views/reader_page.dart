@@ -127,7 +127,7 @@ class _ReaderPageContentState extends State<_ReaderPageContent> {
                               vm.setOverlayText(buffer.toString());
                               // Small delay so the overlay types at a readable but subtle
                               // pace. This creates a visible "typing" effect.
-                              await Future.delayed(const Duration(milliseconds: 5));
+                              await Future.delayed(const Duration(milliseconds: 1));
                             }
                           }
                         }

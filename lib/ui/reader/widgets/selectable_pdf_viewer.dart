@@ -167,7 +167,7 @@ class _SelectablePdfViewerState extends State<SelectablePdfViewer> with WidgetsB
               },
               minHeight: 240.0,
               largeBreakpoint: 300.0,
-              fixedLargeWidthFactor: 0.7,
+              fixedLargeWidthFactor: 0.8,
               gap: 8.0,
             ));
 

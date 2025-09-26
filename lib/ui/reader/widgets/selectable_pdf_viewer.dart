@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:math' as math;
 import 'package:pdfrx/pdfrx.dart';
 import 'package:provider/provider.dart';
 import '../view_model/reader_selection_view_model.dart';
@@ -156,33 +157,59 @@ class _SelectablePdfViewerState extends State<SelectablePdfViewer> with WidgetsB
               return true;
             }());
 
+            // Calculate overlay width behavior: grow to fit content until full width
+            final media = MediaQuery.of(context);
+            final screenWidth = media.size.width;
+            const largeBreakpoint = 1024.0;
+            const fixedLargeWidth = 600.0;
+
+            // max allowed width: page width on small/medium, capped on large
+            final maxAllowedWidth = screenWidth < largeBreakpoint ? pageRect.width : math.min(fixedLargeWidth, pageRect.width);
+
+            // Clamp left so overlay (when it grows to maxAllowedWidth) doesn't overflow page
+            var left = math.min(localRect.left, math.max(0.0, pageRect.width - maxAllowedWidth));
+
+            // Space above and below the selection (in page-local coords)
+            final spaceAbove = localRect.top;
+            final spaceBelow = pageRect.height - localRect.bottom;
+
+            final showBelow = spaceBelow >= spaceAbove;
+            final maxHeight = showBelow ? spaceBelow : spaceAbove;
+
+            // Compute top coordinate depending on whether we show below or above
+            final top = showBelow ? localRect.bottom : math.max(0.0, localRect.top - maxHeight);
+
             widgets.add(Positioned(
-              left: localRect.left,
-              top: localRect.top,
-              width: localRect.width > 50 ? localRect.width : 50, // min width
-              height: localRect.height > 50 ? localRect.height : 50, // min height
+              left: left,
+              top: top,
               child: Material(
                 color: Colors.transparent,
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(4),
                   child: Container(
                     decoration: BoxDecoration(
-                      // Avoid deprecated withOpacity; construct color with ARGB to
-                      // preserve precision and avoid the deprecation warning.
                       color: Color.fromARGB((0.95 * 255).round(), 0, 0, 0),
                     ),
-                    padding: const EdgeInsets.all(2),
-                    child: SingleChildScrollView(
-                      child: Text(
-                        selectionVM.overlayText ?? '',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontFamily: 'Vazirmatn',
+                    padding: const EdgeInsets.all(8),
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(maxWidth: maxAllowedWidth, maxHeight: maxHeight),
+                      child: SingleChildScrollView(
+                        child: IntrinsicWidth(
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              selectionVM.overlayText ?? '',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontFamily: 'Vazirmatn',
+                              ),
+                              textAlign: TextAlign.start,
+                              textDirection: TextDirection.rtl,
+                              softWrap: true,
+                            ),
+                          ),
                         ),
-                        textAlign: TextAlign.justify,
-                        textDirection: TextDirection.rtl,
-                        softWrap: true,
                       ),
                     ),
                   ),

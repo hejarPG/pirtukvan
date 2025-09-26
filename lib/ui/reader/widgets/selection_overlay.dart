@@ -255,7 +255,7 @@ class SelectionOverlay extends StatelessWidget {
       final name = (p is Map) ? (p['name']?.toString() ?? '') : (p is PromptItem ? p.name : p.toString());
       final text = (p is Map) ? (p['text']?.toString() ?? '') : (p is PromptItem ? p.text : null);
       return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4.0),
+        padding: const EdgeInsets.symmetric(vertical: 2.0),
         child: GestureDetector(
           onTap: vm.isTranslating || text == null
               ? null
@@ -286,12 +286,16 @@ class SelectionOverlay extends StatelessWidget {
           child: Container(
             decoration: BoxDecoration(
               color: Colors.white24,
-              borderRadius: BorderRadius.circular(4),
+              borderRadius: BorderRadius.circular(3),
             ),
-            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+            padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
             child: Text(
               name,
-              style: TextStyle(color: Colors.white, fontSize: SettingsService.getOverlayFontSize(), fontFamily: 'Vazirmatn'),
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: (SettingsService.getOverlayFontSize() - 2.0).clamp(8.0, 100.0),
+                fontFamily: 'Vazirmatn',
+              ),
             ),
           ),
         ),

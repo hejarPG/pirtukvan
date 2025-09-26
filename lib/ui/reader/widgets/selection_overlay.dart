@@ -117,10 +117,14 @@ class SelectionOverlay extends StatelessWidget {
                                 ),
                               ),
                             )
-                          : ListView(
-                              shrinkWrap: true,
-                              padding: EdgeInsets.zero,
-                              children: _buildPromptTiles(context, prompts, selectedText, vm),
+                          : SingleChildScrollView(
+                              child: IntrinsicWidth(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: _buildPromptTiles(context, prompts, selectedText, vm),
+                                ),
+                              ),
                             ),
                     )
                   else

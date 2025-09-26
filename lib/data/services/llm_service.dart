@@ -11,9 +11,17 @@ class LlmService {
 
   bool _initialized = false;
   late final GenerativeModel _model;
-  // System prompt instructing the LLM to return responses in Markdown format.
+  // System prompt instructing the LLM to return responses in Markdown format
+  // and to prefix the response with a direction directive based on the
+  // language of the output. The directive must appear at the very start of
+  // the response and follow one of these forms (either is accepted by the
+  // client overlay):
+  //   <!-- dir:rtl -->   or   :dir=rtl   or   [dir=rtl]
+  // Use 'rtl' for right-to-left languages (e.g. Arabic, Persian, Hebrew)
+  // and 'ltr' for left-to-right languages (e.g. English). The rest of the
+  // response must be valid Markdown.
   static const String _systemPrompt =
-      'You are an assistant that MUST return all answers strictly in Markdown format. Use Markdown for emphasis (e.g. **bold**), lists, headings, links, inline code and code blocks. Do not include any text outside of valid Markdown.';
+    'You are an assistant that MUST return all answers strictly in Markdown format. In addition, at the very start of the response, include a single direction marker indicating the text direction based on the language of the response: use "<!-- dir:rtl -->" (or equivalent like ":dir=rtl") for right-to-left languages (Arabic, Persian, Hebrew), and "<!-- dir:ltr -->" for left-to-right languages. After this single marker, return the content as valid Markdown. Use Markdown for emphasis (e.g. **bold**), lists, headings, links, inline code and code blocks. Do not include any text outside of valid Markdown.';
 
   Future<void> initialize() async {
     if (_initialized) return;

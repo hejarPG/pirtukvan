@@ -55,54 +55,53 @@ class SelectionOverlay extends StatelessWidget {
       if (top < 0.0) top = 0.0;
     }
 
-    return Positioned(
-      left: 0,
-      right: 0,
-      top: top,
-      child: Align(
-        alignment: Alignment(alignmentX.clamp(-1.0, 1.0), 0.0),
-        child: Material(
-          color: Colors.transparent,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Color.fromARGB((0.95 * 255).round(), 0, 0, 0),
+    // Pre-process markdown to detect optional leading direction marker and
+    // strip it from the content before rendering.
+    String mdData = overlayText ?? '';
+    TextDirection mdDirection = TextDirection.rtl;
+    final dirReg = RegExp(r'^\s*(?:<!--\s*dir\s*:\s*(rtl|ltr)\s*-->|:dir=(rtl|ltr)|\[dir=(rtl|ltr)\])', caseSensitive: false);
+    final m = dirReg.firstMatch(mdData);
+    if (m != null) {
+      final d = (m.group(1) ?? m.group(2) ?? m.group(3) ?? '').toLowerCase();
+      if (d == 'ltr') mdDirection = TextDirection.ltr;
+      if (d == 'rtl') mdDirection = TextDirection.rtl;
+      mdData = mdData.substring(m.end).trimLeft();
+    }
+
+    final overlayChild = Align(
+      alignment: Alignment(alignmentX.clamp(-1.0, 1.0), 0.0),
+      child: Material(
+        color: Colors.transparent,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(4),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Color.fromARGB((0.95 * 255).round(), 0, 0, 0),
+            ),
+            padding: const EdgeInsets.all(8),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: maxAllowedWidth,
+                maxHeight: enforcedHeight,
+                minHeight: enforceMin ? math.min(minHeight, enforcedHeight) : 0.0,
               ),
-              // padding: const EdgeInsets.all(8),
-                child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxWidth: maxAllowedWidth,
-                  maxHeight: enforcedHeight,
-                  minHeight: enforceMin ? math.min(minHeight, enforcedHeight) : 0.0,
-                ),
-                child: SingleChildScrollView(
-                  child: IntrinsicWidth(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Directionality(
-                        textDirection: TextDirection.rtl,
-                        child: MarkdownBody(
-                          data: overlayText ?? '',
-                          selectable: false,
-                          styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
-                            p: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                              fontFamily: 'Vazirmatn',
-                            ),
-                            // Make list bullets white as well
-                            listBullet: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                              fontFamily: 'Vazirmatn',
-                            ),
-                            a: const TextStyle(
-                              color: Colors.lightBlueAccent,
-                              decoration: TextDecoration.underline,
-                            ),
+              child: SingleChildScrollView(
+                child: IntrinsicWidth(
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: Directionality(
+                      textDirection: mdDirection,
+                      child: MarkdownBody(
+                        data: mdData,
+                        selectable: false,
+                        styleSheet: MarkdownStyleSheet(
+                          p: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontFamily: 'Vazirmatn',
                           ),
                         ),
+                        shrinkWrap: true,
                       ),
                     ),
                   ),
@@ -111,6 +110,26 @@ class SelectionOverlay extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+
+    if (showBelow) {
+      return Positioned(
+        left: 0,
+        right: 0,
+        top: top,
+        child: overlayChild,
+      );
+    }
+
+    final bottom = pageRect.height - localRect.top + gap;
+    return Positioned(
+      left: 0,
+      right: 0,
+      bottom: bottom,
+      child: Align(
+        alignment: Alignment(alignmentX.clamp(-1.0, 1.0), 1.0),
+        child: overlayChild,
       ),
     );
   }

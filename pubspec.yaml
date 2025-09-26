@@ -41,7 +41,7 @@ dependencies:
   flutter_markdown: ^0.7.7+1
   firebase_core: ^4.1.0
   hive: ^2.2.3
-  hive_flutter: ^1.1.0
+  hive_flutter: ^1.1.0  
   crypto: ^3.0.6
   auto_size_text: ^3.0.0
 

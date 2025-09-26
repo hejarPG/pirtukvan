@@ -180,91 +180,67 @@ class _SelectablePdfViewerState extends State<SelectablePdfViewer> with WidgetsB
             final spaceBelow = pageRect.height - localRect.bottom;
 
             final showBelow = spaceBelow >= spaceAbove;
-            final maxHeight = showBelow ? spaceBelow : spaceAbove;
+            final availableSpace = showBelow ? spaceBelow : spaceAbove;
 
-            // Small gap so overlay doesn't touch/cover the selection
+            // Minimum height we want for the overlay. If this doesn't fit in the
+            // available space, we allow the overlay to overlap the selection so
+            // the content still shows (but we won't exceed the page height).
+            const minHeight = 240.0;
+
+            // effectiveHeight: at least minHeight when possible, but never larger
+            // than the page height and prefer availableSpace when it's larger.
+            final effectiveHeight = math.min(math.max(availableSpace, minHeight), pageRect.height);
+
+            // Small gap so overlay doesn't touch/cover the selection when possible
             const gap = 8.0;
 
-            // For below: pin top to localRect.bottom + gap. For above: pin bottom so
-            // overlay's bottom is at localRect.top - gap. Using bottom avoids needing
-            // to know the child's measured height and guarantees no overlap.
+            // Compute top so overlay sits below or above selection. If there isn't
+            // enough space, adjust so it stays inside page bounds and may overlap
+            // the selection.
+            double top = 0.0;
             if (showBelow) {
-              final top = localRect.bottom + gap;
-              widgets.add(Positioned(
-                left: 0,
-                right: 0,
-                top: top,
-                child: Align(
-                  alignment: Alignment(alignmentX.clamp(-1.0, 1.0), -1.0),
-                  child: Material(
-                    color: Colors.transparent,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Color.fromARGB((0.95 * 255).round(), 0, 0, 0),
-                        ),
-                        padding: const EdgeInsets.all(8),
-                        child: ConstrainedBox(
-                          constraints: BoxConstraints(maxWidth: maxAllowedWidth, maxHeight: maxHeight),
-                          child: SingleChildScrollView(
-                            child: IntrinsicWidth(
-                              child: Align(
-                                alignment: Alignment.centerLeft,
-                                child: Text(
-                                  selectionVM.overlayText ?? '',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 12,
-                                    fontFamily: 'Vazirmatn',
-                                  ),
-                                  textAlign: TextAlign.start,
-                                  textDirection: TextDirection.rtl,
-                                  softWrap: true,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ));
+              top = localRect.bottom + gap;
+              if (top + effectiveHeight > pageRect.height) {
+                top = math.max(0.0, pageRect.height - effectiveHeight);
+              }
             } else {
-              final bottom = pageRect.height - localRect.top + gap;
-              widgets.add(Positioned(
-                left: 0,
-                right: 0,
-                bottom: bottom,
-                child: Align(
-                  alignment: Alignment(alignmentX.clamp(-1.0, 1.0), 1.0),
-                  child: Material(
-                    color: Colors.transparent,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Color.fromARGB((0.95 * 255).round(), 0, 0, 0),
-                        ),
-                        padding: const EdgeInsets.all(8),
-                        child: ConstrainedBox(
-                          constraints: BoxConstraints(maxWidth: maxAllowedWidth, maxHeight: maxHeight),
-                          child: SingleChildScrollView(
-                            child: IntrinsicWidth(
-                              child: Align(
-                                alignment: Alignment.centerLeft,
-                                child: Text(
-                                  selectionVM.overlayText ?? '',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 12,
-                                    fontFamily: 'Vazirmatn',
-                                  ),
-                                  textAlign: TextAlign.start,
-                                  textDirection: TextDirection.rtl,
-                                  softWrap: true,
+              top = localRect.top - gap - effectiveHeight;
+              if (top < 0.0) {
+                top = 0.0;
+              }
+            }
+
+            widgets.add(Positioned(
+              left: 0,
+              right: 0,
+              top: top,
+              child: Align(
+                alignment: Alignment(alignmentX.clamp(-1.0, 1.0), 0.0),
+                child: Material(
+                  color: Colors.transparent,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Color.fromARGB((0.95 * 255).round(), 0, 0, 0),
+                      ),
+                      padding: const EdgeInsets.all(8),
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(maxWidth: maxAllowedWidth, maxHeight: effectiveHeight, minHeight: math.min(minHeight, effectiveHeight)),
+                        child: SingleChildScrollView(
+                          child: IntrinsicWidth(
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                selectionVM.overlayText ?? '',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontFamily: 'Vazirmatn',
                                 ),
+                                textAlign: TextAlign.start,
+                                textDirection: TextDirection.rtl,
+                                softWrap: true,
                               ),
                             ),
                           ),
@@ -273,8 +249,8 @@ class _SelectablePdfViewerState extends State<SelectablePdfViewer> with WidgetsB
                     ),
                   ),
                 ),
-              ));
-            }
+              ),
+            ));
 
           }
           return widgets;

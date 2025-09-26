@@ -35,16 +35,22 @@ class SelectionOverlay extends StatelessWidget {
     final showBelow = spaceBelow >= spaceAbove;
     final availableSpace = showBelow ? spaceBelow : spaceAbove;
 
-    final effectiveHeight = math.min(math.max(availableSpace, minHeight), pageRect.height);
+    // Only enforce minHeight when available space is less than minHeight.
+    // Otherwise allow the overlay to size to its content (so small content
+    // won't produce an unnecessarily large overlay).
+    final enforceMin = availableSpace < minHeight;
+    final effectiveHeight = math.min(availableSpace, pageRect.height);
+    final enforcedHeight = enforceMin ? math.min(minHeight, pageRect.height) : effectiveHeight;
 
     double top = 0.0;
     if (showBelow) {
       top = localRect.bottom + gap;
-      if (top + effectiveHeight > pageRect.height) {
-        top = math.max(0.0, pageRect.height - effectiveHeight);
+      if (top + enforcedHeight > pageRect.height) {
+        // Move up to fit; this may cause overlap with selection if enforcedHeight > availableSpace
+        top = math.max(0.0, pageRect.height - enforcedHeight);
       }
     } else {
-      top = localRect.top - gap - effectiveHeight;
+      top = localRect.top - gap - enforcedHeight;
       if (top < 0.0) top = 0.0;
     }
 
@@ -63,8 +69,12 @@ class SelectionOverlay extends StatelessWidget {
                 color: Color.fromARGB((0.95 * 255).round(), 0, 0, 0),
               ),
               padding: const EdgeInsets.all(8),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: maxAllowedWidth, maxHeight: effectiveHeight, minHeight: math.min(minHeight, effectiveHeight)),
+                child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: maxAllowedWidth,
+                  maxHeight: enforcedHeight,
+                  minHeight: enforceMin ? math.min(minHeight, enforcedHeight) : 0.0,
+                ),
                 child: SingleChildScrollView(
                   child: IntrinsicWidth(
                     child: Align(

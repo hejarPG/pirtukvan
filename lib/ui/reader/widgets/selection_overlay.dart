@@ -78,7 +78,7 @@ class SelectionOverlay extends StatelessWidget {
             decoration: BoxDecoration(
               color: Color.fromARGB((0.95 * 255).round(), 0, 0, 0),
             ),
-            padding: const EdgeInsets.all(8),
+            // padding: const EdgeInsets.all(8),
             child: ConstrainedBox(
               constraints: BoxConstraints(
                 maxWidth: maxAllowedWidth,
@@ -88,7 +88,7 @@ class SelectionOverlay extends StatelessWidget {
               child: SingleChildScrollView(
                 child: IntrinsicWidth(
                   child: Padding(
-                    padding: const EdgeInsets.only(left: 8.0),
+                    padding: const EdgeInsets.all(8.0),
                     child: Directionality(
                       textDirection: mdDirection,
                       child: MarkdownBody(

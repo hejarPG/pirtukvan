@@ -260,45 +260,46 @@ class SelectionOverlay extends StatelessWidget {
       final text = (p is Map) ? (p['text']?.toString() ?? '') : (p is PromptItem ? p.text : null);
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 2.0),
-        child: GestureDetector(
-          onTap: vm.isTranslating || text == null
-              ? null
-              : () async {
-                  // start translating using same flow as the FAB
-                  vm.setTranslating(true);
-                  final genId = vm.startGeneration();
-                  final stream = llm.generateStream(selectedText, promptTemplate: text);
-                  final buffer = StringBuffer();
-                  try {
-                    await for (final chunk in stream) {
-                      if (!vm.isCurrentGeneration(genId)) break;
-                      if (chunk.isNotEmpty) {
-                        for (final rune in chunk.runes) {
-                          if (!vm.isCurrentGeneration(genId)) break;
-                          buffer.write(String.fromCharCode(rune));
-                          vm.setOverlayText(buffer.toString());
-                          await Future.delayed(const Duration(milliseconds: 1));
+        child: Material(
+          color: Colors.white24,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(3)),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(3),
+            onTap: vm.isTranslating || text == null
+                ? null
+                : () async {
+                    // start translating using same flow as the FAB
+                    vm.setTranslating(true);
+                    final genId = vm.startGeneration();
+                    final stream = llm.generateStream(selectedText, promptTemplate: text);
+                    final buffer = StringBuffer();
+                    try {
+                      await for (final chunk in stream) {
+                        if (!vm.isCurrentGeneration(genId)) break;
+                        if (chunk.isNotEmpty) {
+                          for (final rune in chunk.runes) {
+                            if (!vm.isCurrentGeneration(genId)) break;
+                            buffer.write(String.fromCharCode(rune));
+                            vm.setOverlayText(buffer.toString());
+                            await Future.delayed(const Duration(milliseconds: 1));
+                          }
                         }
                       }
+                    } catch (e) {
+                      if (vm.isCurrentGeneration(genId)) vm.setOverlayText('');
+                    } finally {
+                      if (vm.isCurrentGeneration(genId)) vm.setTranslating(false);
                     }
-                  } catch (e) {
-                    if (vm.isCurrentGeneration(genId)) vm.setOverlayText('');
-                  } finally {
-                    if (vm.isCurrentGeneration(genId)) vm.setTranslating(false);
-                  }
-                },
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white24,
-              borderRadius: BorderRadius.circular(3),
-            ),
-            padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
-            child: Text(
-              name,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: (SettingsService.getOverlayFontSize() - 2.0).clamp(8.0, 100.0),
-                fontFamily: 'Vazirmatn',
+                  },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
+              child: Text(
+                name,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: (SettingsService.getOverlayFontSize() - 2.0).clamp(8.0, 100.0),
+                  fontFamily: 'Vazirmatn',
+                ),
               ),
             ),
           ),

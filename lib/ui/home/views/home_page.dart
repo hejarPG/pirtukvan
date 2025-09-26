@@ -97,6 +97,12 @@ class HomePage extends StatelessWidget {
                               label: const Text('GitHub'),
                             ),
                           ),
+                          const SizedBox(height: 12),
+                          Text(
+                            "The name 'Pirtukvan' is inspired by Kurdish: 'pirtuk' means 'book' and the suffix '-van' denotes someone skilled or engaged in an activity—together conveying the idea of a 'book expert' or 'librarian'.",
+                            style: Theme.of(context).textTheme.bodySmall,
+                            textAlign: TextAlign.justify,
+                          ),
                         ],
                       ),
                     ),

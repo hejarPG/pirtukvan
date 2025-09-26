@@ -40,9 +40,11 @@ class SettingsViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void updateModel(String v) {
+  Future<void> updateModel(String v) async {
     selectedModel = v;
     notifyListeners();
+    // Persist immediately so the chosen model remains when reopening settings
+    await SettingsService.setModel(selectedModel);
   }
 
   Future<void> updateOverlayFontSize(double v) async {

@@ -27,7 +27,7 @@ class SelectionOverlay extends StatelessWidget {
     this.onClose,
     this.onCopySelectedText,
     this.minHeight = 120.0,
-    this.minWidth = 80.0,
+    this.minWidth = 100.0,
     this.largeBreakpoint = 1024.0,
     this.fixedLargeWidthFactor = 0.7,
     this.gap = 8.0,
@@ -174,6 +174,27 @@ class SelectionOverlay extends StatelessWidget {
                         onTap: onClose,
                         child: const Icon(
                           Icons.close,
+                          size: 18,
+                          color: Colors.white70,
+                        ),
+                      ),
+                    ),
+                  // Back button: appears when loading or when a result is shown.
+                  // Tapping it cancels any in-flight generation and returns to the prompt list.
+                  if (vm.isTranslating || (mdData).isNotEmpty)
+                    Positioned(
+                      right: 28,
+                      top: 4,
+                      child: GestureDetector(
+                        onTap: () {
+                          // Cancel any in-flight generation by bumping generation
+                          // and clearing overlay text, and clear translating flag.
+                          vm.startGeneration();
+                          vm.setOverlayText('');
+                          vm.setTranslating(false);
+                        },
+                        child: const Icon(
+                          Icons.arrow_back,
                           size: 18,
                           color: Colors.white70,
                         ),

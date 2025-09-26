@@ -200,38 +200,40 @@ class SelectionOverlay extends StatelessWidget {
                         ),
                       ),
                     ),
-                  // Copy button in top-left corner of overlay
-                  if ((mdData).isNotEmpty)
-                    Positioned(
-                      left: 4,
-                      top: 4,
-                      child: GestureDetector(
-                        onTap: () async {
-                          final messenger = ScaffoldMessenger.of(context);
-                          try {
-                            await Clipboard.setData(ClipboardData(text: mdData));
-                            messenger.showSnackBar(
-                              const SnackBar(
-                                content: Text('Copied to clipboard'),
-                                duration: Duration(milliseconds: 800),
-                              ),
-                            );
-                          } catch (_) {
-                            messenger.showSnackBar(
-                              const SnackBar(
-                                content: Text('Unable to copy'),
-                                duration: Duration(milliseconds: 800),
-                              ),
-                            );
-                          }
-                        },
-                        child: const Icon(
-                          Icons.copy,
-                          size: 18,
-                          color: Colors.white70,
-                        ),
+                  // Copy button in top-left corner of overlay. Always visible
+                  // but disabled (dimmed and no tap) when there is no overlay text.
+                  Positioned(
+                    left: 4,
+                    top: 4,
+                    child: GestureDetector(
+                      onTap: (mdData).isNotEmpty
+                          ? () async {
+                              final messenger = ScaffoldMessenger.of(context);
+                              try {
+                                await Clipboard.setData(ClipboardData(text: mdData));
+                                messenger.showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Copied to clipboard'),
+                                    duration: Duration(milliseconds: 800),
+                                  ),
+                                );
+                              } catch (_) {
+                                messenger.showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Unable to copy'),
+                                    duration: Duration(milliseconds: 800),
+                                  ),
+                                );
+                              }
+                            }
+                          : null,
+                      child: Icon(
+                        Icons.copy,
+                        size: 18,
+                        color: (mdData).isNotEmpty ? Colors.white70 : Colors.white24,
                       ),
                     ),
+                  ),
                   // Copy selected text button (uses viewer's selection delegate)
                   if (onCopySelectedText != null)
                     Positioned(

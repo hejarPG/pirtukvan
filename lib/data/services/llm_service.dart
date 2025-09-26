@@ -11,6 +11,9 @@ class LlmService {
 
   bool _initialized = false;
   late final GenerativeModel _model;
+  // System prompt instructing the LLM to return responses in Markdown format.
+  static const String _systemPrompt =
+      'You are an assistant that MUST return all answers strictly in Markdown format. Use Markdown for emphasis (e.g. **bold**), lists, headings, links, inline code and code blocks. Do not include any text outside of valid Markdown.';
 
   Future<void> initialize() async {
     if (_initialized) return;
@@ -30,7 +33,8 @@ class LlmService {
     await initialize();
     final template = promptTemplate ?? SettingsService.getPromptTemplate();
     final filled = template.replaceAll('{text}', text);
-    final prompt = [Content.text(filled)];
+  // Prepend a system-style prompt so the model returns Markdown-formatted output.
+  final prompt = [Content.text(_systemPrompt), Content.text(filled)];
     int attempt = 0;
     while (true) {
       try {
@@ -59,7 +63,8 @@ class LlmService {
     await initialize();
     final template = promptTemplate ?? SettingsService.getPromptTemplate();
     final filled = template.replaceAll('{text}', text);
-    final prompt = [Content.text(filled)];
+  // Prepend a system-style prompt so the model returns Markdown-formatted output.
+  final prompt = [Content.text(_systemPrompt), Content.text(filled)];
 
     final responseStream = _model.generateContentStream(prompt);
     await for (final chunk in responseStream) {

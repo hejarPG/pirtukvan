@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'dart:math' as math;
 
 class SelectionOverlay extends StatelessWidget {
@@ -68,7 +69,7 @@ class SelectionOverlay extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Color.fromARGB((0.95 * 255).round(), 0, 0, 0),
               ),
-              padding: const EdgeInsets.all(8),
+              // padding: const EdgeInsets.all(8),
                 child: ConstrainedBox(
                 constraints: BoxConstraints(
                   maxWidth: maxAllowedWidth,
@@ -77,18 +78,31 @@ class SelectionOverlay extends StatelessWidget {
                 ),
                 child: SingleChildScrollView(
                   child: IntrinsicWidth(
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        overlayText ?? '',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontFamily: 'Vazirmatn',
-                        ),
-                        textAlign: TextAlign.start,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Directionality(
                         textDirection: TextDirection.rtl,
-                        softWrap: true,
+                        child: MarkdownBody(
+                          data: overlayText ?? '',
+                          selectable: false,
+                          styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
+                            p: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontFamily: 'Vazirmatn',
+                            ),
+                            // Make list bullets white as well
+                            listBullet: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontFamily: 'Vazirmatn',
+                            ),
+                            a: const TextStyle(
+                              color: Colors.lightBlueAccent,
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ),

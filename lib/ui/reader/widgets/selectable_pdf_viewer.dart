@@ -120,22 +120,9 @@ class _SelectablePdfViewerState extends State<SelectablePdfViewer> with WidgetsB
             }
           },
         ),
-        // viewer-level overlay: capture taps to rebuild overlays if needed
+        // viewer-level overlay: no longer clear selection on tap; provide scroll
+        // thumbs on the right side only. Close is handled by the overlay button.
         viewerOverlayBuilder: (context, size, handleLinkTap) => [
-          Positioned.fill(
-            child: GestureDetector(
-              behavior: HitTestBehavior.translucent,
-              onTap: () async {
-                try {
-                  await _controller.textSelectionDelegate.clearTextSelection();
-                } catch (_) {
-                  // ignore: no-op
-                }
-                selectionVM.clearSelection();
-              },
-            ),
-          ),
-          // Add scroll thumbs on the right side
           ScrollThumbs(controller: _controller, orientation: ScrollbarOrientation.right),
         ],
         pageOverlaysBuilder: (context, pageRect, page) {
@@ -161,6 +148,12 @@ class _SelectablePdfViewerState extends State<SelectablePdfViewer> with WidgetsB
               pageRect: pageRect,
               localRect: localRect,
               overlayText: selectionVM.overlayText,
+              onClose: () async {
+                try {
+                  await _controller.textSelectionDelegate.clearTextSelection();
+                } catch (_) {}
+                selectionVM.clearSelection();
+              },
               minHeight: 240.0,
               largeBreakpoint: 300.0,
               fixedLargeWidthFactor: 0.7,

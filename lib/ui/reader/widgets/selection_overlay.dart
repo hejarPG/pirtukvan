@@ -10,12 +10,14 @@ class SelectionOverlay extends StatelessWidget {
   final double largeBreakpoint;
   final double fixedLargeWidthFactor;
   final double gap;
+  final VoidCallback? onClose;
 
   const SelectionOverlay({
     super.key,
     required this.pageRect,
     required this.localRect,
     required this.overlayText,
+    this.onClose,
     this.minHeight = 120.0,
     this.largeBreakpoint = 1024.0,
     this.fixedLargeWidthFactor = 0.7,
@@ -85,27 +87,45 @@ class SelectionOverlay extends StatelessWidget {
                 maxHeight: enforcedHeight,
                 minHeight: enforceMin ? math.min(minHeight, enforcedHeight) : 0.0,
               ),
-              child: SingleChildScrollView(
-                child: IntrinsicWidth(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Directionality(
-                      textDirection: mdDirection,
-                      child: MarkdownBody(
-                        data: mdData,
-                        selectable: false,
-                        styleSheet: MarkdownStyleSheet(
-                          p: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontFamily: 'Vazirmatn',
+              child: Stack(
+                children: [
+                  SingleChildScrollView(
+                    child: IntrinsicWidth(
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0, top: 28.0),
+                        child: Directionality(
+                          textDirection: mdDirection,
+                          child: MarkdownBody(
+                            data: mdData,
+                            selectable: false,
+                            styleSheet: MarkdownStyleSheet(
+                              p: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontFamily: 'Vazirmatn',
+                              ),
+                            ),
+                            shrinkWrap: true,
                           ),
                         ),
-                        shrinkWrap: true,
                       ),
                     ),
                   ),
-                ),
+                  // Close button in top-right corner of overlay
+                  if (onClose != null)
+                    Positioned(
+                      right: 4,
+                      top: 4,
+                      child: GestureDetector(
+                        onTap: onClose,
+                        child: const Icon(
+                          Icons.close,
+                          size: 18,
+                          color: Colors.white70,
+                        ),
+                      ),
+                    ),
+                ],
               ),
             ),
           ),

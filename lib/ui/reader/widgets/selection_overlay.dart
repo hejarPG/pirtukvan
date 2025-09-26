@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:flutter/services.dart';
 import 'dart:math' as math;
 
 class SelectionOverlay extends StatelessWidget {
@@ -7,6 +8,7 @@ class SelectionOverlay extends StatelessWidget {
   final Rect localRect;
   final String? overlayText;
   final double minHeight;
+  final double minWidth;
   final double largeBreakpoint;
   final double fixedLargeWidthFactor;
   final double gap;
@@ -19,6 +21,7 @@ class SelectionOverlay extends StatelessWidget {
     required this.overlayText,
     this.onClose,
     this.minHeight = 120.0,
+    this.minWidth = 60.0,
     this.largeBreakpoint = 1024.0,
     this.fixedLargeWidthFactor = 0.7,
     this.gap = 8.0,
@@ -84,6 +87,7 @@ class SelectionOverlay extends StatelessWidget {
             child: ConstrainedBox(
               constraints: BoxConstraints(
                 maxWidth: maxAllowedWidth,
+                minWidth: math.min(minWidth, maxAllowedWidth),
                 maxHeight: enforcedHeight,
                 minHeight: enforceMin ? math.min(minHeight, enforcedHeight) : 0.0,
               ),
@@ -120,6 +124,38 @@ class SelectionOverlay extends StatelessWidget {
                         onTap: onClose,
                         child: const Icon(
                           Icons.close,
+                          size: 18,
+                          color: Colors.white70,
+                        ),
+                      ),
+                    ),
+                  // Copy button in top-left corner of overlay
+                  if ((mdData).isNotEmpty)
+                    Positioned(
+                      left: 4,
+                      top: 4,
+                      child: GestureDetector(
+                        onTap: () async {
+                          final messenger = ScaffoldMessenger.of(context);
+                          try {
+                            await Clipboard.setData(ClipboardData(text: mdData));
+                            messenger.showSnackBar(
+                              const SnackBar(
+                                content: Text('Copied to clipboard'),
+                                duration: Duration(milliseconds: 800),
+                              ),
+                            );
+                          } catch (_) {
+                            messenger.showSnackBar(
+                              const SnackBar(
+                                content: Text('Unable to copy'),
+                                duration: Duration(milliseconds: 800),
+                              ),
+                            );
+                          }
+                        },
+                        child: const Icon(
+                          Icons.copy,
                           size: 18,
                           color: Colors.white70,
                         ),

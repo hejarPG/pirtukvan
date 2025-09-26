@@ -132,7 +132,12 @@ class _SelectablePdfViewerState extends State<SelectablePdfViewer> with WidgetsB
         pageOverlaysBuilder: (context, pageRect, page) {
           // Render overlay when selection belongs to this page
           final widgets = <Widget>[];
-          if (selectionVM.selectedPageNumber == page.pageNumber && selectionVM.selectedBounds != null && selectionVM.isOverlayVisible) {
+          // Show overlay when the selection belongs to this page and we have
+          // selection bounds. Previously the overlay required overlayText to
+          // be non-empty; since prompt selection must appear before any
+          // translation is produced, also show when there is selected text.
+          final hasSelectionText = selectionVM.selectedText != null && selectionVM.selectedText!.isNotEmpty;
+          if (selectionVM.selectedPageNumber == page.pageNumber && selectionVM.selectedBounds != null && (selectionVM.isOverlayVisible || hasSelectionText)) {
             // Convert PdfRect (PDF page coords) to Flutter Rect in viewer coordinates
             final bounds = selectionVM.selectedBounds!;
             // toRectInDocument will map PDF coords to the provided pageRect

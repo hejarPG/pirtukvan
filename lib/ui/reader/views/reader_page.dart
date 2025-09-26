@@ -2,8 +2,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../data/services/llm_service.dart';
-import '../../../data/services/settings_service.dart';
+// imports for translation moved into overlay
 import '../../settings/views/settings_page.dart';
 import '../view_model/reader_selection_view_model.dart';
 import '../widgets/selectable_pdf_viewer.dart';
@@ -35,7 +34,7 @@ class _ReaderPageContentState extends State<_ReaderPageContent> {
 
   @override
   Widget build(BuildContext context) {
-    final selectionVM = Provider.of<ReaderSelectionViewModel>(context);
+  // selection VM is consumed by children (overlay/viewer) via provider
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.file.path.split('/').last),
@@ -69,89 +68,7 @@ class _ReaderPageContentState extends State<_ReaderPageContent> {
           },
         ),
       ),
-      floatingActionButton: selectionVM.selectedText != null && selectionVM.selectedText!.isNotEmpty
-          ? FloatingActionButton(
-              onPressed: selectionVM.isTranslating
-                  ? null
-                  : () async {
-                      // Use centralized config so developers can set it in one place.
-                      // See `lib/data/config.dart`.
-
-                      final vm = Provider.of<ReaderSelectionViewModel>(context, listen: false);
-                      final translator = LlmService();
-                      // set translating state so UI shows loader
-                      vm.setTranslating(true);
-                      // capture text before awaiting to avoid using context/VM across async gap
-                      final textToTranslate = selectionVM.selectedText;
-                      // Ask user to choose a prompt template if any are saved
-                      final prompts = SettingsService.getPrompts();
-                      String? chosenTemplate;
-                      if (prompts.isNotEmpty) {
-                        final sel = await showDialog<PromptItem?>(
-                          context: context,
-                          builder: (_) => SimpleDialog(
-                            title: const Text('Choose prompt'),
-                            children: prompts
-                                .map((p) => SimpleDialogOption(
-                                      onPressed: () => Navigator.of(context).pop(p),
-                                      child: Text(p.name),
-                                    ))
-                                .toList(),
-                          ),
-                        );
-                        chosenTemplate = sel?.text;
-                      }
-
-                      // Stream translation so UI updates as chunks arrive
-                      final stream = translator.generateStream(
-                        textToTranslate ?? '',
-                        promptTemplate: chosenTemplate,
-                      );
-                      final buffer = StringBuffer();
-                      // Start a new generation so we can ignore any previous
-                      // translation streams if the overlay is closed or another
-                      // translation begins.
-                      final genId = vm.startGeneration();
-                      try {
-                        await for (final chunk in stream) {
-                          // If the overlay has been closed or a new generation
-                          // started, stop applying updates from this stream.
-                          if (!vm.isCurrentGeneration(genId)) break;
-                          if (chunk.isNotEmpty) {
-                            // Append one Unicode codepoint (rune) at a time so the overlay
-                            // appears to type out character-by-character. Yield to the
-                            // event loop between characters to let the UI repaint.
-                            for (final rune in chunk.runes) {
-                              if (!vm.isCurrentGeneration(genId)) break;
-                              buffer.write(String.fromCharCode(rune));
-                              vm.setOverlayText(buffer.toString());
-                              // Small delay so the overlay types at a readable but subtle
-                              // pace. This creates a visible "typing" effect.
-                              await Future.delayed(const Duration(milliseconds: 1));
-                            }
-                          }
-                        }
-                      } catch (e) {
-                        // On error, clear translating state and optionally set an error message
-                        // Only clear overlay if this generation is still current.
-                        if (vm.isCurrentGeneration(genId)) vm.setOverlayText('');
-                      } finally {
-                        // Only clear translating flag if this generation is still current.
-                        if (vm.isCurrentGeneration(genId)) vm.setTranslating(false);
-                      }
-                    },
-              child: selectionVM.isTranslating
-                  ? const SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                        strokeWidth: 2.5,
-                      ),
-                    )
-                  : const Icon(Icons.smart_toy),
-            )
-          : null,
+      // Translation is triggered from the inline overlay now; no FAB.
     );
   }
 }

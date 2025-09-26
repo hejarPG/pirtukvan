@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter/services.dart';
 import 'dart:math' as math;
+import 'package:provider/provider.dart';
 import '../../../data/services/settings_service.dart';
+import '../../../data/services/llm_service.dart';
+import '../view_model/reader_selection_view_model.dart';
 
 class SelectionOverlay extends StatelessWidget {
   final Rect pageRect;
@@ -32,6 +35,7 @@ class SelectionOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final vm = Provider.of<ReaderSelectionViewModel>(context);
     final availableWidth = pageRect.width;
     final fixedLargeWidth = fixedLargeWidthFactor * availableWidth;
     final maxAllowedWidth = availableWidth < largeBreakpoint ? availableWidth : math.min(fixedLargeWidth, availableWidth);
@@ -60,15 +64,18 @@ class SelectionOverlay extends StatelessWidget {
     // Pre-process markdown to detect optional leading direction marker and
     // strip it from the content before rendering.
     String mdData = overlayText ?? '';
-    TextDirection mdDirection = TextDirection.rtl;
     final dirReg = RegExp(r'^\s*(?:<!--\s*dir\s*:\s*(rtl|ltr)\s*-->|:dir=(rtl|ltr)|\[dir=(rtl|ltr)\])', caseSensitive: false);
     final m = dirReg.firstMatch(mdData);
     if (m != null) {
-      final d = (m.group(1) ?? m.group(2) ?? m.group(3) ?? '').toLowerCase();
-      if (d == 'ltr') mdDirection = TextDirection.ltr;
-      if (d == 'rtl') mdDirection = TextDirection.rtl;
+      // We only strip any leading direction marker; rendering direction
+      // is handled below by Directionality widgets already present in the
+      // layout (overlay content uses RTL by default).
       mdData = mdData.substring(m.end).trimLeft();
     }
+
+    // Access selected text and prompts from services/view model
+    final selectedText = vm.selectedText;
+    final prompts = SettingsService.getPrompts();
 
     final overlayChild = Align(
       alignment: Alignment(alignmentX.clamp(-1.0, 1.0), 0.0),
@@ -90,28 +97,68 @@ class SelectionOverlay extends StatelessWidget {
               ),
               child: Stack(
                 children: [
-                  SingleChildScrollView(
-                    child: IntrinsicWidth(
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0, top: 28.0),
-                        child: Directionality(
-                          textDirection: TextDirection.rtl,
-                          child: MarkdownBody(
-                            data: mdData,
-                            selectable: false,
-                            styleSheet: MarkdownStyleSheet(
-                              p: TextStyle(
-                                color: Colors.white,
-                                fontSize: SettingsService.getOverlayFontSize(),
-                                fontFamily: 'Vazirmatn',
+                  // If there is no overlay text yet but a selection exists,
+                  // show the prompt chooser. If a translation is in progress,
+                  // show a loading indicator. Otherwise render the Markdown result.
+                  if ((mdData).isEmpty && selectedText != null && selectedText.isNotEmpty)
+                    SingleChildScrollView(
+                      child: IntrinsicWidth(
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0, top: 28.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 8.0),
+                                child: Text(
+                                  'Choose prompt',
+                                  style: TextStyle(color: Colors.white70, fontSize: SettingsService.getOverlayFontSize() + 1, fontFamily: 'Vazirmatn'),
+                                ),
                               ),
+                              if (vm.isTranslating)
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 24.0),
+                                  child: Center(
+                                    child: SizedBox(
+                                      width: 28,
+                                      height: 28,
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 2.5,
+                                      ),
+                                    ),
+                                  ),
+                                )
+                              else
+                                ..._buildPromptTiles(context, prompts, selectedText, vm),
+                            ],
+                          ),
+                        ),
+                      ),
+                    )
+                  else
+                    SingleChildScrollView(
+                      child: IntrinsicWidth(
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0, top: 28.0),
+                          child: Directionality(
+                            textDirection: TextDirection.rtl,
+                            child: MarkdownBody(
+                              data: mdData,
+                              selectable: false,
+                              styleSheet: MarkdownStyleSheet(
+                                p: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: SettingsService.getOverlayFontSize(),
+                                  fontFamily: 'Vazirmatn',
+                                ),
+                              ),
+                              shrinkWrap: true,
                             ),
-                            shrinkWrap: true,
                           ),
                         ),
                       ),
                     ),
-                  ),
                   // Close button in top-right corner of overlay
                   if (onClose != null)
                     Positioned(
@@ -213,5 +260,55 @@ class SelectionOverlay extends StatelessWidget {
       top: top,
       child: overlayChild,
     );
+  }
+
+  List<Widget> _buildPromptTiles(BuildContext context, List prompts, String selectedText, ReaderSelectionViewModel vm) {
+    final llm = LlmService();
+    return prompts.map<Widget>((p) {
+      final name = (p is Map) ? (p['name']?.toString() ?? '') : (p is PromptItem ? p.name : p.toString());
+      final text = (p is Map) ? (p['text']?.toString() ?? '') : (p is PromptItem ? p.text : null);
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4.0),
+        child: GestureDetector(
+          onTap: vm.isTranslating || text == null
+              ? null
+              : () async {
+                  // start translating using same flow as the FAB
+                  vm.setTranslating(true);
+                  final genId = vm.startGeneration();
+                  final stream = llm.generateStream(selectedText, promptTemplate: text);
+                  final buffer = StringBuffer();
+                  try {
+                    await for (final chunk in stream) {
+                      if (!vm.isCurrentGeneration(genId)) break;
+                      if (chunk.isNotEmpty) {
+                        for (final rune in chunk.runes) {
+                          if (!vm.isCurrentGeneration(genId)) break;
+                          buffer.write(String.fromCharCode(rune));
+                          vm.setOverlayText(buffer.toString());
+                          await Future.delayed(const Duration(milliseconds: 1));
+                        }
+                      }
+                    }
+                  } catch (e) {
+                    if (vm.isCurrentGeneration(genId)) vm.setOverlayText('');
+                  } finally {
+                    if (vm.isCurrentGeneration(genId)) vm.setTranslating(false);
+                  }
+                },
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white24,
+              borderRadius: BorderRadius.circular(4),
+            ),
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+            child: Text(
+              name,
+              style: TextStyle(color: Colors.white, fontSize: SettingsService.getOverlayFontSize(), fontFamily: 'Vazirmatn'),
+            ),
+          ),
+        ),
+      );
+    }).toList();
   }
 }

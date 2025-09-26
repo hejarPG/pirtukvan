@@ -158,13 +158,15 @@ class _SelectablePdfViewerState extends State<SelectablePdfViewer> with WidgetsB
             }());
 
             // Calculate overlay width behavior: grow to fit content until full width
-            final media = MediaQuery.of(context);
-            final screenWidth = media.size.width;
-            const largeBreakpoint = 1024.0;
-            const fixedLargeWidth = 600.0;
+            // Use the PDF page's available width (pageRect.width) rather than
+            // the device screen width so decisions are based on the viewer's
+            // content area.
+            final availableWidth = pageRect.width;
+            const largeBreakpoint = 300.0;
+            final fixedLargeWidth = 0.7 * availableWidth;
 
-            // max allowed width: page width on small/medium, capped on large
-            final maxAllowedWidth = screenWidth < largeBreakpoint ? pageRect.width : math.min(fixedLargeWidth, pageRect.width);
+            // max allowed width: available page width on small/medium, capped on large
+            final maxAllowedWidth = availableWidth < largeBreakpoint ? availableWidth : math.min(fixedLargeWidth, availableWidth);
 
             // Clamp left so overlay (when it grows to maxAllowedWidth) doesn't overflow page
             var left = math.min(localRect.left, math.max(0.0, pageRect.width - maxAllowedWidth));
@@ -190,7 +192,7 @@ class _SelectablePdfViewerState extends State<SelectablePdfViewer> with WidgetsB
                     decoration: BoxDecoration(
                       color: Color.fromARGB((0.95 * 255).round(), 0, 0, 0),
                     ),
-                    padding: const EdgeInsets.all(8),
+                    // padding: const EdgeInsets.all(8),
                     child: ConstrainedBox(
                       constraints: BoxConstraints(maxWidth: maxAllowedWidth, maxHeight: maxHeight),
                       child: SingleChildScrollView(
@@ -204,7 +206,7 @@ class _SelectablePdfViewerState extends State<SelectablePdfViewer> with WidgetsB
                                 fontSize: 12,
                                 fontFamily: 'Vazirmatn',
                               ),
-                              textAlign: TextAlign.start,
+                              textAlign: TextAlign.justify,
                               textDirection: TextDirection.rtl,
                               softWrap: true,
                             ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter/services.dart';
 import 'dart:math' as math;
+import '../../../data/services/settings_service.dart';
 
 class SelectionOverlay extends StatelessWidget {
   final Rect pageRect;
@@ -103,9 +104,9 @@ class SelectionOverlay extends StatelessWidget {
                             data: mdData,
                             selectable: false,
                             styleSheet: MarkdownStyleSheet(
-                              p: const TextStyle(
+                              p: TextStyle(
                                 color: Colors.white,
-                                fontSize: 12,
+                                fontSize: SettingsService.getOverlayFontSize(),
                                 fontFamily: 'Vazirmatn',
                               ),
                             ),

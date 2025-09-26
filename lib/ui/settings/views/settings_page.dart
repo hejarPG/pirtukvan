@@ -52,6 +52,28 @@ class _SettingsFormState extends State<_SettingsForm> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // Overlay font size control
+          const Text('Overlay font size:'),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: Slider(
+                  value: vm.overlayFontSize,
+                  min: 8.0,
+                  max: 24.0,
+                  divisions: 16,
+                  label: vm.overlayFontSize.toStringAsFixed(0),
+                  onChanged: (v) => vm.updateOverlayFontSize(v),
+                ),
+              ),
+              SizedBox(
+                width: 48,
+                child: Text('${vm.overlayFontSize.toStringAsFixed(0)}sp'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
           const SizedBox(height: 8),
           const Text('Choose LLM model:'),
           const SizedBox(height: 8),

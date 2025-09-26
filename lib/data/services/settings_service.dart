@@ -23,10 +23,12 @@ class SettingsService {
   static const _keyPrompt = 'prompt_template';
   static const _keyPrompts = 'prompt_items';
   static const _keyModel = 'llm_model';
+  static const _keyOverlayFontSize = 'overlay_font_size';
 
   static const String defaultPrompt =
       'Translate the following text to Persian (Farsi). Just return the translation, nothing else.\nText: {text}';
   static const String defaultModel = 'gemini-2.5-flash';
+  static const double defaultOverlayFontSize = 12.0;
 
   static const List<String> availableModels = [
     'gemini-2.5-pro',
@@ -168,6 +170,23 @@ class SettingsService {
     } catch (_) {
       return defaultModel;
     }
+  }
+
+  static double getOverlayFontSize() {
+    try {
+      final v = _box.get(_keyOverlayFontSize);
+      if (v is num) return v.toDouble();
+      if (v is String) return double.tryParse(v) ?? defaultOverlayFontSize;
+      return defaultOverlayFontSize;
+    } catch (_) {
+      return defaultOverlayFontSize;
+    }
+  }
+
+  static Future<void> setOverlayFontSize(double size) async {
+    try {
+      await _box.put(_keyOverlayFontSize, size);
+    } catch (_) {}
   }
 
   static Future<void> setModel(String model) async {

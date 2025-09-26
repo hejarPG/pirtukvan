@@ -9,12 +9,14 @@ class PromptListItem {
 class SettingsViewModel extends ChangeNotifier {
   String promptTemplate = SettingsService.getPromptTemplate();
   String selectedModel = SettingsService.getModel();
+  double overlayFontSize = SettingsService.getOverlayFontSize();
   List<PromptItem> prompts = [];
 
   List<String> get availableModels => SettingsService.availableModels;
 
   Future<void> loadPrompts() async {
     prompts = SettingsService.getPrompts();
+    overlayFontSize = SettingsService.getOverlayFontSize();
     notifyListeners();
   }
 
@@ -43,8 +45,16 @@ class SettingsViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> updateOverlayFontSize(double v) async {
+    overlayFontSize = v;
+    notifyListeners();
+    // Persist immediately so changes take effect without pressing save
+    await SettingsService.setOverlayFontSize(v);
+  }
+
   Future<void> save() async {
     await SettingsService.setPromptTemplate(promptTemplate);
     await SettingsService.setModel(selectedModel);
+    await SettingsService.setOverlayFontSize(overlayFontSize);
   }
 }

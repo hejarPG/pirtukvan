@@ -108,13 +108,7 @@ class SelectionOverlay extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              Padding(
-                                padding: const EdgeInsets.only(bottom: 8.0),
-                                child: Text(
-                                  'Choose prompt',
-                                  style: TextStyle(color: Colors.white70, fontSize: SettingsService.getOverlayFontSize() + 1, fontFamily: 'Vazirmatn'),
-                                ),
-                              ),
+                              // prompt list header removed per request
                               if (vm.isTranslating)
                                 Padding(
                                   padding: const EdgeInsets.symmetric(vertical: 24.0),

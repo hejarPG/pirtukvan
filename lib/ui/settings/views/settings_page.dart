@@ -92,6 +92,13 @@ class _SettingsFormState extends State<_SettingsForm> {
           const SizedBox(height: 8),
           AddPromptButton(vm: vm),
 
+          const SizedBox(height: 8),
+          Text(
+            'Tip: use the placeholder {text} in your prompts. It will be replaced with the currently selected text from the PDF when you run the action.',
+            // style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 12) ?? const TextStyle(fontSize: 12),
+          ),
+          const SizedBox(height: 12),
+
           Expanded(
             child: PromptList(vm: vm),
           ),

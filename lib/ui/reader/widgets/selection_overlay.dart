@@ -39,10 +39,10 @@ class SelectionOverlay extends StatelessWidget {
     final selectionCenterX = localRect.left + localRect.width / 2.0;
     final alignmentX = ((selectionCenterX / pageRect.width) * 2.0) - 1.0;
 
-    final spaceAbove = localRect.top;
     final spaceBelow = pageRect.height - localRect.bottom;
-    final showBelow = spaceBelow >= spaceAbove;
-    final availableSpace = showBelow ? spaceBelow : spaceAbove;
+    // Always show the overlay below the selection. If there's not enough
+    // space below, we will move the overlay up so it fits on the page.
+    final availableSpace = spaceBelow;
 
     // Only enforce minHeight when available space is less than minHeight.
     // Otherwise allow the overlay to size to its content (so small content
@@ -51,16 +51,10 @@ class SelectionOverlay extends StatelessWidget {
     final effectiveHeight = math.min(availableSpace, pageRect.height);
     final enforcedHeight = enforceMin ? math.min(minHeight, pageRect.height) : effectiveHeight;
 
-    double top = 0.0;
-    if (showBelow) {
-      top = localRect.bottom + gap;
-      if (top + enforcedHeight > pageRect.height) {
-        // Move up to fit; this may cause overlap with selection if enforcedHeight > availableSpace
-        top = math.max(0.0, pageRect.height - enforcedHeight);
-      }
-    } else {
-      top = localRect.top - gap - enforcedHeight;
-      if (top < 0.0) top = 0.0;
+    double top = localRect.bottom + gap;
+    if (top + enforcedHeight > pageRect.height) {
+      // Move up to fit; this may cause overlap with selection if enforcedHeight > availableSpace
+      top = math.max(0.0, pageRect.height - enforcedHeight);
     }
 
     // Pre-process markdown to detect optional leading direction marker and
@@ -213,24 +207,11 @@ class SelectionOverlay extends StatelessWidget {
       ),
     );
 
-    if (showBelow) {
-      return Positioned(
-        left: 0,
-        right: 0,
-        top: top,
-        child: overlayChild,
-      );
-    }
-
-    final bottom = pageRect.height - localRect.top + gap;
     return Positioned(
       left: 0,
       right: 0,
-      bottom: bottom,
-      child: Align(
-        alignment: Alignment(alignmentX.clamp(-1.0, 1.0), 1.0),
-        child: overlayChild,
-      ),
+      top: top,
+      child: overlayChild,
     );
   }
 }

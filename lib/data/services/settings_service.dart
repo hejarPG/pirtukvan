@@ -77,6 +77,13 @@ class SettingsService {
             'Explain the following text in Persian (Farsi) using simple words and short sentences. Provide 2-3 short examples that illustrate the explanation. Only output Persian, nothing else.\nText: {text}',
       );
 
+        final translateWordPrompt = PromptItem(
+          id: 'seed-translate-word',
+          name: 'Translate single word to Persian',
+      text:
+        'Translate the following single word to Persian (Farsi). Return all common translations ordered from most common to least common, separated by commas. If multiple senses exist, include translations for each sense in order. Do not include explanations—only the translations.\nWord: {text}',
+        );
+
       var needSave = false;
       if (!current.any((p) => p.id == translatePrompt.id)) {
         current.add(translatePrompt);
@@ -86,6 +93,10 @@ class SettingsService {
         current.add(explainPrompt);
         needSave = true;
       }
+        if (!current.any((p) => p.id == translateWordPrompt.id)) {
+          current.add(translateWordPrompt);
+          needSave = true;
+        }
 
       if (needSave) await _savePrompts(current);
     } catch (_) {}

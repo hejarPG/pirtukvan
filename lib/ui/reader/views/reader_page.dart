@@ -108,26 +108,36 @@ class _ReaderPageContentState extends State<_ReaderPageContent> {
                         promptTemplate: chosenTemplate,
                       );
                       final buffer = StringBuffer();
+                      // Start a new generation so we can ignore any previous
+                      // translation streams if the overlay is closed or another
+                      // translation begins.
+                      final genId = vm.startGeneration();
                       try {
                         await for (final chunk in stream) {
+                          // If the overlay has been closed or a new generation
+                          // started, stop applying updates from this stream.
+                          if (!vm.isCurrentGeneration(genId)) break;
                           if (chunk.isNotEmpty) {
                             // Append one Unicode codepoint (rune) at a time so the overlay
                             // appears to type out character-by-character. Yield to the
                             // event loop between characters to let the UI repaint.
                             for (final rune in chunk.runes) {
+                              if (!vm.isCurrentGeneration(genId)) break;
                               buffer.write(String.fromCharCode(rune));
                               vm.setOverlayText(buffer.toString());
                               // Small delay so the overlay types at a readable but subtle
                               // pace. This creates a visible "typing" effect.
-                              await Future.delayed(const Duration(milliseconds: 25));
+                              await Future.delayed(const Duration(milliseconds: 5));
                             }
                           }
                         }
                       } catch (e) {
                         // On error, clear translating state and optionally set an error message
-                        vm.setOverlayText('');
+                        // Only clear overlay if this generation is still current.
+                        if (vm.isCurrentGeneration(genId)) vm.setOverlayText('');
                       } finally {
-                        vm.setTranslating(false);
+                        // Only clear translating flag if this generation is still current.
+                        if (vm.isCurrentGeneration(genId)) vm.setTranslating(false);
                       }
                     },
               child: selectionVM.isTranslating

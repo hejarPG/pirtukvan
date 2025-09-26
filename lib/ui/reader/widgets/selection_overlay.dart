@@ -102,19 +102,24 @@ class SelectionOverlay extends StatelessWidget {
                   // show a loading indicator. Otherwise render the Markdown result.
                   if ((mdData).isEmpty && selectedText != null && selectedText.isNotEmpty)
                     Padding(
-                      padding: const EdgeInsets.only(left: 6.0, right: 6.0, bottom: 2.0, top: 28.0),
+                      padding: const EdgeInsets.only(left: 6.0, right: 6.0, bottom: 6.0, top: 28.0),
                       child: vm.isTranslating
-                          ? Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 24.0),
-                              child: Center(
-                                child: SizedBox(
-                                  width: 28,
-                                  height: 28,
-                                  child: CircularProgressIndicator(
-                                    color: Colors.white,
-                                    strokeWidth: 2.5,
+                          ? IntrinsicWidth(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  const SizedBox(height: 6.0),
+                                  SizedBox(
+                                    width: 28,
+                                    height: 28,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2.5,
+                                    ),
                                   ),
-                                ),
+                                  const SizedBox(height: 6.0),
+                                ],
                               ),
                             )
                           : SingleChildScrollView(
@@ -131,7 +136,7 @@ class SelectionOverlay extends StatelessWidget {
                     SingleChildScrollView(
                       child: IntrinsicWidth(
                         child: Padding(
-                          padding: const EdgeInsets.only(left: 6.0, right: 6.0, bottom: 2.0, top: 28.0),
+                          padding: const EdgeInsets.only(left: 6.0, right: 6.0, bottom: 6.0, top: 28.0),
                           child: Directionality(
                             textDirection: TextDirection.rtl,
                             child: MarkdownBody(

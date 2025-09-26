@@ -111,9 +111,16 @@ class _ReaderPageContentState extends State<_ReaderPageContent> {
                       try {
                         await for (final chunk in stream) {
                           if (chunk.isNotEmpty) {
-                            buffer.write(chunk);
-                            // Update overlay as we receive chunks so the viewer shows progress
-                            vm.setOverlayText(buffer.toString());
+                            // Append one Unicode codepoint (rune) at a time so the overlay
+                            // appears to type out character-by-character. Yield to the
+                            // event loop between characters to let the UI repaint.
+                            for (final rune in chunk.runes) {
+                              buffer.write(String.fromCharCode(rune));
+                              vm.setOverlayText(buffer.toString());
+                              // Small delay so the overlay types at a readable but subtle
+                              // pace. This creates a visible "typing" effect.
+                              await Future.delayed(const Duration(milliseconds: 25));
+                            }
                           }
                         }
                       } catch (e) {

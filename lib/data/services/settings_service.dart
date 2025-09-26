@@ -26,7 +26,7 @@ class SettingsService {
   static const _keyOverlayFontSize = 'overlay_font_size';
 
   static const String defaultPrompt =
-      'Translate the following text to Persian (Farsi). Just return the translation, nothing else.\nText: {text}';
+    'Translate the following text to Persian (Farsi). Detect the source language automatically. First normalize common PDF extraction artifacts: remove hyphenation caused by line breaks (e.g. "exam-\nple" -> "example"), join lines that belong to the same paragraph while preserving paragraph breaks, collapse multiple spaces to a single space, and trim leading/trailing whitespace. Preserve intentional formatting (lists, headings) when clearly present. After normalization, translate while preserving punctuation and basic formatting. Do not add explanations or commentary — return only the translated text.\nText: {text}';
   static const String defaultModel = 'gemini-2.5-flash';
   static const double defaultOverlayFontSize = 12.0;
 
@@ -63,12 +63,12 @@ class SettingsService {
         }
       }
 
-      final translatePrompt = PromptItem(
-        id: 'seed-translate',
-        name: 'Translate to Persian',
-        text:
-            'Translate the following text to Persian (Farsi). Just return the translation, nothing else.\nText: {text}',
-      );
+  final translatePrompt = PromptItem(
+    id: 'seed-translate',
+    name: 'Translate text',
+    text:
+      'Translate the following text to Persian (Farsi). Detect the source language automatically. First normalize common PDF extraction artifacts: remove hyphenation from broken lines (e.g. "exam-\nple" -> "example"), join lines belonging to the same paragraph while keeping paragraph breaks, collapse repeated spaces, and trim leading/trailing whitespace. Preserve intentional line breaks for lists or verses when clearly present. After normalization, translate the text and preserve punctuation and basic formatting. Return only the translated text with no additional commentary. If names or specialized terms appear, keep them unchanged unless a well-known Persian equivalent exists.\nText: {text}',
+  );
 
       final explainPrompt = PromptItem(
         id: 'seed-explain',

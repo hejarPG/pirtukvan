@@ -102,7 +102,7 @@ class SelectionOverlay extends StatelessWidget {
                   // show a loading indicator. Otherwise render the Markdown result.
                   if ((mdData).isEmpty && selectedText != null && selectedText.isNotEmpty)
                     Padding(
-                      padding: const EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0, top: 28.0),
+                      padding: const EdgeInsets.only(left: 6.0, right: 6.0, bottom: 2.0, top: 28.0),
                       child: vm.isTranslating
                           ? Padding(
                               padding: const EdgeInsets.symmetric(vertical: 24.0),
@@ -131,7 +131,7 @@ class SelectionOverlay extends StatelessWidget {
                     SingleChildScrollView(
                       child: IntrinsicWidth(
                         child: Padding(
-                          padding: const EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0, top: 28.0),
+                          padding: const EdgeInsets.only(left: 6.0, right: 6.0, bottom: 2.0, top: 28.0),
                           child: Directionality(
                             textDirection: TextDirection.rtl,
                             child: MarkdownBody(
@@ -261,12 +261,12 @@ class SelectionOverlay extends StatelessWidget {
       final name = (p is Map) ? (p['name']?.toString() ?? '') : (p is PromptItem ? p.name : p.toString());
       final text = (p is Map) ? (p['text']?.toString() ?? '') : (p is PromptItem ? p.text : null);
       final tile = Padding(
-        padding: const EdgeInsets.symmetric(vertical: 2.0),
+        padding: const EdgeInsets.symmetric(vertical: 0.5),
         child: Material(
           color: Colors.transparent,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(3)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
           child: InkWell(
-            borderRadius: BorderRadius.circular(3),
+            borderRadius: BorderRadius.circular(2),
             onTap: vm.isTranslating || text == null
                 ? null
                 : () async {
@@ -294,7 +294,7 @@ class SelectionOverlay extends StatelessWidget {
                     }
                   },
             child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
+              padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 8),
               child: Text(
                 name,
                 style: TextStyle(
@@ -311,8 +311,8 @@ class SelectionOverlay extends StatelessWidget {
       widgets.add(tile);
       if (i != prompts.length - 1) {
         widgets.add(const Padding(
-          padding: EdgeInsets.symmetric(vertical: 2.0),
-          child: Divider(color: Colors.white24, height: 1, thickness: 0.5),
+          padding: EdgeInsets.symmetric(vertical: 0.0),
+          child: Divider(color: Colors.white24, height: 1, thickness: 0.4),
         ));
       }
     }

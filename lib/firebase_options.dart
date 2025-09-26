@@ -64,7 +64,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '397414897523',
     projectId: 'pirtukvan-d0c66',
     storageBucket: 'pirtukvan-d0c66.firebasestorage.app',
-    iosBundleId: 'com.example.pirtukvan',
+  iosBundleId: 'ir.jireyar.pirtukvan',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
@@ -73,7 +73,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '397414897523',
     projectId: 'pirtukvan-d0c66',
     storageBucket: 'pirtukvan-d0c66.firebasestorage.app',
-    iosBundleId: 'com.example.pirtukvan',
+  iosBundleId: 'ir.jireyar.pirtukvan',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(

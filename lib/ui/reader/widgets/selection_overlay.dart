@@ -56,19 +56,27 @@ class SelectionOverlay extends StatelessWidget {
     // render compact content even when space calculations are degenerate.
     if (maxHeightForOverlay <= 0) maxHeightForOverlay = math.min(pageRect.height, 200.0);
 
-    final enforcedHeight = math.min(maxHeightForOverlay, pageRect.height);
+    // If available space is smaller than the desired minHeight, allow the
+    // overlay to overlap the selection by using minHeight (or page height)
+    // and shifting the top position so the overlay can extend into the
+    // selection area. This keeps the overlay visible even when selection
+    // is near the page edges.
+    final desiredHeight = math.min(pageRect.height, math.max(minHeight, maxHeightForOverlay));
+    final enforcedHeight = desiredHeight;
 
     double top;
     if (showBelow) {
-      top = localRect.bottom + gap;
-      // Ensure the overlay fits; if not, clamp it to the top that lets it
-      // fit within the page.
-      if (top + enforcedHeight > pageRect.height) {
-        top = math.max(0.0, pageRect.height - enforcedHeight);
-      }
+      // Compute overlap amount when enforcedHeight is greater than available space
+      final overlap = math.max(0.0, enforcedHeight - maxHeightForOverlay);
+      top = localRect.bottom + gap - overlap;
+      // Clamp to page bounds
+      if (top < 0) top = 0;
+      if (top + enforcedHeight > pageRect.height) top = math.max(0.0, pageRect.height - enforcedHeight);
     } else {
-      // Show above selection. Place the overlay so its bottom is gap above the selection.
-      top = math.max(0.0, localRect.top - gap - enforcedHeight);
+      final overlap = math.max(0.0, enforcedHeight - maxHeightForOverlay);
+      top = localRect.top - gap - enforcedHeight + overlap;
+      if (top < 0) top = 0;
+      if (top + enforcedHeight > pageRect.height) top = math.max(0.0, pageRect.height - enforcedHeight);
     }
 
     // Pre-process markdown to detect optional leading direction marker and

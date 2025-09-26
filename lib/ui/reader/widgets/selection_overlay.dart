@@ -255,13 +255,15 @@ class SelectionOverlay extends StatelessWidget {
 
   List<Widget> _buildPromptTiles(BuildContext context, List prompts, String selectedText, ReaderSelectionViewModel vm) {
     final llm = LlmService();
-    return prompts.map<Widget>((p) {
+    final widgets = <Widget>[];
+    for (var i = 0; i < prompts.length; i++) {
+      final p = prompts[i];
       final name = (p is Map) ? (p['name']?.toString() ?? '') : (p is PromptItem ? p.name : p.toString());
       final text = (p is Map) ? (p['text']?.toString() ?? '') : (p is PromptItem ? p.text : null);
-      return Padding(
+      final tile = Padding(
         padding: const EdgeInsets.symmetric(vertical: 2.0),
         child: Material(
-          color: Colors.white24,
+          color: Colors.transparent,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(3)),
           child: InkWell(
             borderRadius: BorderRadius.circular(3),
@@ -305,6 +307,15 @@ class SelectionOverlay extends StatelessWidget {
           ),
         ),
       );
-    }).toList();
+
+      widgets.add(tile);
+      if (i != prompts.length - 1) {
+        widgets.add(const Padding(
+          padding: EdgeInsets.symmetric(vertical: 2.0),
+          child: Divider(color: Colors.white24, height: 1, thickness: 0.5),
+        ));
+      }
+    }
+    return widgets;
   }
 }

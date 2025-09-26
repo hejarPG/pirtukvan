@@ -100,6 +100,7 @@ class _SelectablePdfViewerState extends State<SelectablePdfViewer> with WidgetsB
           }
         },
         textSelectionParams: PdfTextSelectionParams(
+          showContextMenuAutomatically: false,
           onTextSelectionChange: (selection) async {
             try {
               final selected = await selection.getSelectedText();
@@ -120,6 +121,9 @@ class _SelectablePdfViewerState extends State<SelectablePdfViewer> with WidgetsB
             }
           },
         ),
+  // Prevent the default pdfrx selection context menu (Copy / Select All).
+  // We return null so no built-in toolbar is shown; our own overlay handles actions.
+  buildContextMenu: (context, params) => null,
         // viewer-level overlay: no longer clear selection on tap; provide scroll
         // thumbs on the right side only. Close is handled by the overlay button.
         viewerOverlayBuilder: (context, size, handleLinkTap) => [
@@ -153,6 +157,13 @@ class _SelectablePdfViewerState extends State<SelectablePdfViewer> with WidgetsB
                   await _controller.textSelectionDelegate.clearTextSelection();
                 } catch (_) {}
                 selectionVM.clearSelection();
+              },
+              onCopySelectedText: () async {
+                try {
+                  return await _controller.textSelectionDelegate.copyTextSelection();
+                } catch (_) {
+                  return false;
+                }
               },
               minHeight: 240.0,
               largeBreakpoint: 300.0,

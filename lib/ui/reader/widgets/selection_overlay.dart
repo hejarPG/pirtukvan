@@ -14,6 +14,7 @@ class SelectionOverlay extends StatelessWidget {
   final double fixedLargeWidthFactor;
   final double gap;
   final VoidCallback? onClose;
+  final Future<bool> Function()? onCopySelectedText;
 
   const SelectionOverlay({
     super.key,
@@ -21,8 +22,9 @@ class SelectionOverlay extends StatelessWidget {
     required this.localRect,
     required this.overlayText,
     this.onClose,
+    this.onCopySelectedText,
     this.minHeight = 120.0,
-    this.minWidth = 60.0,
+    this.minWidth = 80.0,
     this.largeBreakpoint = 1024.0,
     this.fixedLargeWidthFactor = 0.7,
     this.gap = 8.0,
@@ -157,6 +159,47 @@ class SelectionOverlay extends StatelessWidget {
                         },
                         child: const Icon(
                           Icons.copy,
+                          size: 18,
+                          color: Colors.white70,
+                        ),
+                      ),
+                    ),
+                  // Copy selected text button (uses viewer's selection delegate)
+                  if (onCopySelectedText != null)
+                    Positioned(
+                      left: 28,
+                      top: 4,
+                      child: GestureDetector(
+                        onTap: () async {
+                          final messenger = ScaffoldMessenger.of(context);
+                          try {
+                            final ok = await onCopySelectedText!.call();
+                            if (ok) {
+                              messenger.showSnackBar(
+                                const SnackBar(
+                                  content: Text('Selected text copied'),
+                                  duration: Duration(milliseconds: 800),
+                                ),
+                              );
+                            } else {
+                              messenger.showSnackBar(
+                                const SnackBar(
+                                  content: Text('Unable to copy selection'),
+                                  duration: Duration(milliseconds: 800),
+                                ),
+                              );
+                            }
+                          } catch (_) {
+                            messenger.showSnackBar(
+                              const SnackBar(
+                                content: Text('Unable to copy selection'),
+                                duration: Duration(milliseconds: 800),
+                              ),
+                            );
+                          }
+                        },
+                        child: const Icon(
+                          Icons.text_snippet,
                           size: 18,
                           color: Colors.white70,
                         ),

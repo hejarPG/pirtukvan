@@ -101,34 +101,27 @@ class SelectionOverlay extends StatelessWidget {
                   // show the prompt chooser. If a translation is in progress,
                   // show a loading indicator. Otherwise render the Markdown result.
                   if ((mdData).isEmpty && selectedText != null && selectedText.isNotEmpty)
-                    SingleChildScrollView(
-                      child: IntrinsicWidth(
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0, top: 28.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              // prompt list header removed per request
-                              if (vm.isTranslating)
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 24.0),
-                                  child: Center(
-                                    child: SizedBox(
-                                      width: 28,
-                                      height: 28,
-                                      child: CircularProgressIndicator(
-                                        color: Colors.white,
-                                        strokeWidth: 2.5,
-                                      ),
-                                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0, top: 28.0),
+                      child: vm.isTranslating
+                          ? Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 24.0),
+                              child: Center(
+                                child: SizedBox(
+                                  width: 28,
+                                  height: 28,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2.5,
                                   ),
-                                )
-                              else
-                                ..._buildPromptTiles(context, prompts, selectedText, vm),
-                            ],
-                          ),
-                        ),
-                      ),
+                                ),
+                              ),
+                            )
+                          : ListView(
+                              shrinkWrap: true,
+                              padding: EdgeInsets.zero,
+                              children: _buildPromptTiles(context, prompts, selectedText, vm),
+                            ),
                     )
                   else
                     SingleChildScrollView(

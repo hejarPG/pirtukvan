@@ -1,0 +1,164 @@
+Pirtukvan
+=========
+
+> A Lightweight PDF reader with streaming Gemini-powered overlays for Kurdish and Persian readers.
+
+Table of Contents
+-----------------
+
+1. [Overview](#overview)
+2. [Feature Highlights](#feature-highlights)
+3. [How It Works](#how-it-works)
+4. [Prerequisites](#prerequisites)
+5. [Setup & Run](#setup--run)
+6. [Firebase + Gemini Configuration](#firebase--gemini-configuration)
+7. [Using The App](#using-the-app)
+8. [Custom Prompts & Models](#custom-prompts--models)
+9. [Persistence & Storage](#persistence--storage)
+10. [Project Layout](#project-layout)
+11. [Tech Stack](#tech-stack)
+12. [Troubleshooting](#troubleshooting)
+13. [Contributing](#contributing)
+
+Overview
+--------
+
+Pirtukvan is a Flutter application focused on comfortable PDF reading for Persian and Kurdish speakers. It combines a minimal offline-first reader with on-demand large language model (LLM) assistance delivered through Firebase AI (Gemini). Select text inside any PDF and receive inline translations, explanations, or glossary-style lookups streamed directly inside the page.
+
+Feature Highlights
+------------------
+
+* **File-system PDF access** – choose any local PDF via the native picker or open documents directly from Android's "Open with" intent pipeline.
+* **Streaming LLM overlay** – highlight text to open an overlay card that streams Markdown responses from Gemini and keeps context anchored to your selection.
+* **Prompt library** – curate reusable prompt templates (translate, explain, word lookup, etc.) with `{text}` placeholders and trigger them from the overlay.
+* **Rich clipboard actions** – copy the AI response or the underlying PDF selection without leaving the overlay.
+* **Reader ergonomics** – quick dark/light inversion, draggable scroll thumbs, and automatic restoration to the last page you read.
+* **Settings surface** – adjust overlay typography, switch among Gemini model variants, and manage prompts in one place.
+
+How It Works
+------------
+
+* `lib/ui/home/views/home_page.dart` shows the landing page with the PDF picker, about section, and a shortcut to Settings.
+* `lib/ui/reader/widgets/selectable_pdf_viewer.dart` wraps the `pdfrx` viewer to capture selections, map PDF coordinates to overlay positions, and persist the last visited page via `PdfPageStorageService`.
+* `lib/ui/reader/widgets/selection_overlay.dart` renders the floating Markdown panel, streams Gemini output token-by-token, and exposes prompt buttons, copy controls, and cancel/back actions.
+* `lib/data/services/llm_service.dart` bootstraps Firebase AI, selects the active Gemini model from user settings, and provides both buffered and streaming generation APIs with retry logic.
+* `lib/data/services/settings_service.dart` + Hive keep prompt definitions, font settings, and model preferences on-device; `SettingsViewModel` exposes them to the UI via Provider.
+* `lib/data/services/intent_handler_service.dart` wires a MethodChannel so Android's `ACTION_VIEW` intents open directly inside the reader.
+
+Prerequisites
+-------------
+
+* Flutter SDK 3.10 (or newer) with Dart 3.3+.
+* A Firebase project with:
+  * Firebase Core configured for every platform you plan to run.
+  * Firebase AI (Vertex AI / Google AI) access to the Gemini models listed in `SettingsService.availableModels`.
+  * Android `google-services.json` and iOS/macOS `GoogleService-Info.plist` placed under the respective platform folders.
+* A machine that can run Flutter desktop/mobile targets (Android Studio, Xcode, etc.).
+
+Setup & Run
+-----------
+
+1. **Clone & install dependencies**
+	```bash
+	git clone https://github.com/hejarpg/pirtukvan.git
+	cd pirtukvan
+	flutter pub get
+	```
+2. **Generate Firebase config** (skip if `lib/firebase_options.dart` is already up to date):
+	```bash
+	flutterfire configure --project=<your-firebase-project-id>
+	```
+3. **Run the desired target**
+	```bash
+	flutter run -d <device-id>
+	```
+4. **Build release artifacts**
+	```bash
+	flutter build apk   # or: flutter build appbundle / ios / linux ...
+	```
+
+Firebase + Gemini Configuration
+--------------------------------
+
+1. Enable the *Firebase AI API* (a.k.a. Google AI Studio / generative capabilities) in the Google Cloud project that backs Firebase.
+2. Grant your Firebase app access to the Gemini models you want (e.g., `gemini-2.5-flash`, `gemini-3-pro-preview`).
+3. Confirm the Firebase app IDs inside `firebase_options.dart` match the platform builds you run.
+4. If you restrict network egress, allow HTTPS calls to Google AI endpoints because `firebase_ai` streams directly from there.
+5. Rebuild the app so updated options are compiled into the binary.
+
+Using The App
+-------------
+
+* **Home**: tap **Open PDF** to pick a document. The about card links to the maintainer's GitHub profile and explains the name origin ("book expert").
+* **Reader**: the file name appears in the AppBar alongside quick Settings access and a contrast toggle that inverts the PDF colors for night reading.
+* **Selection overlay**: select any text to reveal your saved prompts. Choosing one starts a streaming Gemini response; progress is shown inline, and you can cancel/back to choose another prompt immediately.
+* **Clipboard helpers**: copy either the AI output or the raw selection. Snackbars confirm each action.
+* **Android intents**: opening a PDF from another app with "Open with" routes into `IntentHandler`, launching the reader automatically.
+
+Custom Prompts & Models
+-----------------------
+
+1. Go to **Settings → Saved prompts**.
+2. Use **Add prompt** to define a name plus template. Insert `{text}` where the selected PDF excerpt should be injected.
+3. Tap the pencil icon beside any entry to edit, or the trash icon to remove it.
+4. Adjust the **LLM model** dropdown to select which Gemini variant the `LlmService` should call. Changes take effect immediately and persist via Hive.
+5. Tune the **overlay font slider** to improve readability on different screens; the setting is applied in real time within the reader overlay.
+
+Persistence & Storage
+---------------------
+
+* Last-read page: `PdfPageStorageService` hashes each file path/content so Hive can remember where you left off, even if the file is renamed.
+* Settings & prompts: stored inside the `app_settings_box` Hive box. Default prompt seeds (translate to Farsi, explain in Farsi, single-word translation) are auto-created on first launch.
+* Overlay direction markers: if Gemini responds with `<!-- dir:rtl -->`, the overlay strips the hint and renders content RTL using the bundled Vazirmatn font for Persian script fidelity.
+
+Project Layout
+--------------
+
+```
+lib/
+├── main.dart                     # Firebase bootstrap + root MaterialApp
+├── firebase_options.dart         # Generated by flutterfire configure
+├── data/
+│   ├── services/                 # Hive, file picker, intent, LLM helpers
+│   └── config.dart               # Reserved for future runtime config
+└── ui/
+	 ├── app_theme.dart            # Light/Dark color system
+	 ├── home/                     # Landing screen
+	 ├── reader/                   # Selectable viewer + overlay widgets
+	 └── settings/                 # Prompt/model management UI
+```
+
+Tech Stack
+----------
+
+* Flutter (Material 3, Provider for state)
+* `pdfrx` for high-fidelity PDF rendering and selection ranges
+* `firebase_ai` + Firebase Core for Gemini access
+* `hive` / `hive_flutter` for lightweight persistence
+* `file_picker` for cross-platform PDF selection
+* `flutter_markdown` for rich overlay rendering
+* `url_launcher` for external links
+
+Troubleshooting
+---------------
+
+| Symptom | Likely Cause | Fix |
+| --- | --- | --- |
+| Overlay never shows LLM options | Hive prompts not initialized or selection is empty | Ensure `{text}` placeholder exists and the selection spans actual text; check logs for Hive open failures. |
+| `MissingPluginException` for Firebase | `firebase_options.dart` out of date | Re-run `flutterfire configure`, clean, and rebuild. |
+| Gemini calls fail with permission errors | Firebase AI API disabled or model not allowed | Enable the API in Google Cloud Console and verify access to the chosen model. |
+| Reader always opens on page 1 | Storage permission denied or Hive initialization skipped | Confirm `PdfPageStorageService.init()` succeeds (called in `main.dart`) and that the platform grants filesystem access. |
+
+Contributing
+------------
+
+Issues and pull requests are welcome. Please include:
+
+* A short summary of the change and screenshots for UI-facing work.
+* Reproduction steps for any bug fix.
+* Platform(s) tested (Android, iOS, desktop, web, etc.).
+
+License
+-------
+
+No license file has been provided yet. If you plan to release this project publicly, add a license (MIT, Apache-2.0, etc.) to clarify reuse permissions.

@@ -1,6 +1,7 @@
 
 import 'package:firebase_ai/firebase_ai.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'dart:developer' as developer;
 import '../../firebase_options.dart';
 import 'settings_service.dart';
 
@@ -28,21 +29,25 @@ class LlmService {
     // Ensure Firebase is initialized (main.dart initializes Firebase on startup,
     // but calling initializeApp again is safe if already initialized).
     try {
+      developer.log('Initializing Firebase...', name: 'LlmService');
       await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform,
       );
     } catch (_) {}
-  final modelName = SettingsService.getModel();
-  _model = FirebaseAI.googleAI().generativeModel(model: modelName, tools: [Tool.googleSearch()]);
+    final modelName = SettingsService.getModel();
+    developer.log('Selected model: $modelName', name: 'LlmService');
+    _model = FirebaseAI.googleAI().generativeModel(model: modelName, tools: [Tool.googleSearch()]);
     _initialized = true;
+    developer.log('LlmService initialized.', name: 'LlmService');
   }
 
   Future<String> generate(String text, {String? promptTemplate, int retryCount = 2}) async {
     await initialize();
     final template = promptTemplate ?? SettingsService.getPromptTemplate();
     final filled = template.replaceAll('{text}', text);
-  // Prepend a system-style prompt so the model returns Markdown-formatted output.
-  final prompt = [Content.text(_systemPrompt), Content.text(filled)];
+    // Prepend a system-style prompt so the model returns Markdown-formatted output.
+    final prompt = [Content.text(_systemPrompt), Content.text(filled)];
+    developer.log('Generating response for text: $text', name: 'LlmService');
     int attempt = 0;
     while (true) {
       try {
@@ -53,8 +58,10 @@ class LlmService {
           final chunkText = chunk.text?.trim() ?? '';
           if (chunkText.isNotEmpty) buffer.write(chunkText);
         }
+        developer.log('Generation complete (attempt ${attempt + 1})', name: 'LlmService');
         return buffer.toString();
-      } catch (e) {
+      } catch (e, stack) {
+        developer.log('Error during generation (attempt ${attempt + 1}): $e', name: 'LlmService', error: e, stackTrace: stack);
         if (attempt >= retryCount) rethrow;
         await Future.delayed(Duration(milliseconds: 500 * (attempt + 1)));
         attempt++;
@@ -71,13 +78,15 @@ class LlmService {
     await initialize();
     final template = promptTemplate ?? SettingsService.getPromptTemplate();
     final filled = template.replaceAll('{text}', text);
-  // Prepend a system-style prompt so the model returns Markdown-formatted output.
-  final prompt = [Content.text(_systemPrompt), Content.text(filled)];
-
+    // Prepend a system-style prompt so the model returns Markdown-formatted output.
+    final prompt = [Content.text(_systemPrompt), Content.text(filled)];
+    developer.log('Starting streaming generation for text: $text', name: 'LlmService');
     final responseStream = _model.generateContentStream(prompt);
     await for (final chunk in responseStream) {
       final chunkText = chunk.text ?? '';
+      developer.log('Streamed chunk: ${chunkText.length > 50 ? chunkText.substring(0, 50) + '...' : chunkText}', name: 'LlmService');
       yield chunkText;
     }
+    developer.log('Streaming generation complete.', name: 'LlmService');
   }
 }
